@@ -1,7 +1,38 @@
-import { Link } from 'react-router-dom';
-import { Bus, Map, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { Bus, Map, Clock, Search } from 'lucide-react';
 
 const Home = () => {
+    const [routes, setRoutes] = useState([]);
+    const [selectedRoute, setSelectedRoute] = useState('');
+    const [date, setDate] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Fetch available routes for the dropdown
+        const fetchRoutes = async () => {
+            try {
+                const response = await api.get('/routes');
+                setRoutes(response.data);
+            } catch (error) {
+                console.error("Error fetching routes:", error);
+            }
+        };
+        fetchRoutes();
+
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        setDate(today);
+    }, []);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (selectedRoute && date) {
+            navigate(`/search?routeId=${selectedRoute}&date=${date}`);
+        }
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem', marginTop: '2rem' }}>
             {/* Hero Section */}
@@ -18,14 +49,51 @@ const Home = () => {
                     Experience premium bus travel across Sri Lanka. Book your seats instantly with our modern and secure platform.
                 </p>
 
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                    <Link to="/search" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
-                        Find Buses Now
-                    </Link>
-                    <Link to="/login" className="btn btn-outline" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
-                        Partner Login
-                    </Link>
-                </div>
+                {/* Search Widget */}
+                <form onSubmit={handleSearch} style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    background: 'var(--bg-secondary)',
+                    padding: '1rem',
+                    borderRadius: 'var(--radius-md)',
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                    flexWrap: 'wrap'
+                }}>
+                    <div className="input-group" style={{ marginBottom: 0, flex: '1', minWidth: '200px' }}>
+                        <select
+                            className="glass-input"
+                            value={selectedRoute}
+                            onChange={(e) => setSelectedRoute(e.target.value)}
+                            required
+                            style={{ color: selectedRoute ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                        >
+                            <option value="" disabled>Select Route</option>
+                            {routes.map(r => (
+                                <option key={r.id} value={r.id} style={{ color: '#000' }}>
+                                    {r.source} to {r.destination}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="input-group" style={{ marginBottom: 0, flex: '1', minWidth: '200px' }}>
+                        <input
+                            type="date"
+                            className="glass-input"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem', height: '100%' }}>
+                        <Search size={20} /> Search
+                    </button>
+                </form>
             </section>
 
             {/* Features Section */}

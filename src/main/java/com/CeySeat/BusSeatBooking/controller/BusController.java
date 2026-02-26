@@ -24,4 +24,10 @@ public class BusController {
     public Bus addBus(@RequestBody Bus bus) {
         return busService.addBus(bus);
     }
+
+    @GetMapping("/{id}")
+    public Bus getBus(@PathVariable String id) {
+        return busService.getBusById(id)
+                .orElseThrow(() -> new com.CeySeat.BusSeatBooking.exception.ResourceNotFoundException("Bus not found"));
+    }
 }

@@ -29,4 +29,9 @@ public class ScheduleController {
     public Schedule addSchedule(@RequestBody Schedule schedule) {
         return scheduleService.addSchedule(schedule);
     }
+
+    @GetMapping("/{id}")
+    public Schedule getSchedule(@PathVariable String id) {
+        return scheduleService.getSchedule(id);
+    }
 }

@@ -20,6 +20,11 @@ public class ScheduleService {
         return scheduleRepository.findByRouteIdAndDepartureTimeBetween(routeId, start, end);
     }
 
+    public Schedule getSchedule(String id) {
+        return scheduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Schedule not found with id: " + id));
+    }
+
     public Schedule addSchedule(Schedule schedule) {
         return scheduleRepository.save(schedule);
     }

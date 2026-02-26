@@ -1,8 +1,7 @@
 package com.CeySeat.BusSeatBooking.controller;
 
-
 import com.CeySeat.BusSeatBooking.model.Schedule;
-import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
+import com.CeySeat.BusSeatBooking.service.ScheduleService;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,23 +10,23 @@ import java.util.List;
 @RequestMapping("/api/schedules")
 public class ScheduleController {
 
-    private final ScheduleRepository scheduleRepository;
+    private final ScheduleService scheduleService;
 
-    public ScheduleController(ScheduleRepository scheduleRepository) {
-        this.scheduleRepository = scheduleRepository;
+    public ScheduleController(ScheduleService scheduleService) {
+        this.scheduleService = scheduleService;
     }
 
     @GetMapping
     public List<Schedule> getSchedules(@RequestParam String routeId,
-                                       @RequestParam String start,
-                                       @RequestParam String end) {
+            @RequestParam String start,
+            @RequestParam String end) {
         LocalDateTime startTime = LocalDateTime.parse(start);
         LocalDateTime endTime = LocalDateTime.parse(end);
-        return scheduleRepository.findByRouteIdAndDepartureTimeBetween(routeId, startTime, endTime);
+        return scheduleService.getSchedulesByRouteAndTime(routeId, startTime, endTime);
     }
 
     @PostMapping
     public Schedule addSchedule(@RequestBody Schedule schedule) {
-        return scheduleRepository.save(schedule);
+        return scheduleService.addSchedule(schedule);
     }
 }

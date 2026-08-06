@@ -1,57 +1,42 @@
 package com.CeySeat.BusSeatBooking.controller;
 
-
-import com.CeySeat.BusSeatBooking.model.Booking;
-import com.CeySeat.BusSeatBooking.repository.BookingRepository;
+import com.CeySeat.BusSeatBooking.dto.BookingResponse;
+import com.CeySeat.BusSeatBooking.dto.ReserveSeatsRequest;
+import com.CeySeat.BusSeatBooking.service.BookingService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
-import java.util.Arrays;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
 
-    private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
 
-    public BookingController(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
     @GetMapping("/{scheduleId}/seats")
-    public List<String> getBookedSeats(@PathVariable String scheduleId) {
-        List<Booking> bookings = bookingRepository.findByScheduleIdAndStatusIn(scheduleId,
-                Arrays.asList("reserved", "paid"));
-        return bookings.stream()
-                .flatMap(b -> b.getSeats().stream())
-                .collect(Collectors.toList());
+    public ResponseEntity<List<BookingResponse>> getBookedSeats(@PathVariable String scheduleId) {
+        return ResponseEntity.ok(bookingService.getBookedSeats(scheduleId));
     }
 
     @PostMapping("/reserve")
-    public Booking reserveSeats(@RequestBody Booking bookingRequest) {
-        // check if seats are available
-        List<String> bookedSeats = getBookedSeats(bookingRequest.getScheduleId());
-        for (String seat : bookingRequest.getSeats()) {
-            if (bookedSeats.contains(seat)) {
-                throw new RuntimeException("Seat already booked: " + seat);
-            }
-        }
-
-        // set reservedUntil 10 min from now
-        bookingRequest.setStatus("reserved");
-        bookingRequest.setReservedUntil(LocalDateTime.now().plusMinutes(10));
-        return bookingRepository.save(bookingRequest);
+    public ResponseEntity<List<BookingResponse>> reserve(@Valid @RequestBody ReserveSeatsRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.reserveSeats(request));
     }
 
     @PostMapping("/{bookingId}/pay")
-    public Booking payBooking(@PathVariable String bookingId, @RequestParam String paymentRef) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        booking.setStatus("paid");
-        booking.setPaymentReference(paymentRef);
-        booking.setReservedUntil(null);
-        return bookingRepository.save(booking);
+    public ResponseEntity<BookingResponse> pay(@PathVariable String bookingId,
+                                                @RequestParam String paymentRef,
+                                                @RequestParam String userId) {
+        // userId as a request param is temporary until auth is added, at
+        // which point this should come from the authenticated principal
+        // instead of a caller-supplied value.
+        return ResponseEntity.ok(bookingService.payBooking(bookingId, paymentRef, userId));
     }
 }

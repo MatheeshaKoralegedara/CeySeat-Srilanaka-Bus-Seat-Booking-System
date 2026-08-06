@@ -31,7 +31,7 @@ public class BookingService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public List<BookingResponse> reserveSeats(ReserveSeatsRequest request) {
+    public List<BookingResponse> reserveSeats(ReserveSeatsRequest request, String userId) {
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new NotFoundException("Schedule not found: " + request.getScheduleId()));
 
@@ -44,7 +44,7 @@ public class BookingService {
         for (String seatNo : request.getSeatNumbers()) {
             Booking booking = new Booking();
             booking.setScheduleId(request.getScheduleId());
-            booking.setUserId(request.getUserId());
+            booking.setUserId(userId);
             booking.setSeatNo(seatNo);
             booking.setGroupBookingId(groupId);
             booking.setStatus(BookingStatus.RESERVED);

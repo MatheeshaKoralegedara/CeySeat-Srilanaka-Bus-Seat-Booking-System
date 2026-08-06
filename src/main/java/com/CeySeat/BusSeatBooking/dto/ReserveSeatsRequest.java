@@ -11,9 +11,7 @@ public class ReserveSeatsRequest {
     @NotBlank
     private String scheduleId;
 
-    @NotBlank
-    private String userId;
-
+    
     @NotEmpty
     private List<String> seatNumbers;
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://www.payhere.lk/lib/payhere.js"></script>
+</head>
+<body>
+    <button onclick="pay()">Pay Now</button>
+    <script>
+        function pay() {
+            var payment = {
+                sandbox: true,
+                merchant_id: "1237331",
+                return_url: undefined,
+                cancel_url: undefined,
+                notify_url: "https://earpiece-extinct-bucktooth.ngrok-free.dev/api/payments/notify",
+                order_id: "6a757e76bc250bca42d56f43",
+                items: "Bus seat booking",
+                amount: "850.00",
+                currency: "LKR",
+                first_name: "Test",
+                last_name: "User",
+                email: "test2@example.com",
+                phone: "0771234567",
+                address: "Colombo",
+                city: "Colombo",
+                country: "Sri Lanka",
+                hash: "E6C4AB7B45CB5AB1029223E6D6916B7B"
+            };
+            payhere.startPayment(payment);
+        }
+    </script>
+</body>
+</html>

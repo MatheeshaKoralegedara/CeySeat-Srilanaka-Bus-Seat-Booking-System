@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 public class BookingService {
 
-    private static final int HOLD_MINUTES = 10;
+    private static final int HOLD_MINUTES = 20;
 
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;

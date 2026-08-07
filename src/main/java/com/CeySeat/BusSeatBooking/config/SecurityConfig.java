@@ -31,6 +31,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/payments/notify").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/buses/**", "/api/schedules/**", "/api/bookings/*/seats").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/buses/**", "/api/schedules/**").hasAnyRole("OPERATOR", "ADMIN")
                 .anyRequest().authenticated()

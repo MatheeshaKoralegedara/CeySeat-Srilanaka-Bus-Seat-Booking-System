@@ -41,4 +41,9 @@ public class BookingController {
         // instead of a caller-supplied value.
         return ResponseEntity.ok(bookingService.payBooking(bookingId, paymentRef, principal.getName()));
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<BookingResponse>> getMyBookings(java.security.Principal principal) {
+        return ResponseEntity.ok(bookingService.getMyBookings(principal.getName()));
+    }
 }

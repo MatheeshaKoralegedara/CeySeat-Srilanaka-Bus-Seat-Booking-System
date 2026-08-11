@@ -91,4 +91,9 @@ public class BookingService {
         return new BookingResponse(b.getId(), b.getScheduleId(), b.getSeatNo(),
                 b.getStatus(), b.getReservedUntil(), b.getFare());
     }
+
+    public List<BookingResponse> getMyBookings(String userId) {
+        return bookingRepository.findByUserIdOrderByReservedUntilDesc(userId)
+                .stream().map(this::toResponse).collect(Collectors.toList());
+    }
 }

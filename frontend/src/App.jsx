@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Schedules from './pages/Schedules';
 import SeatSelect from './pages/SeatSelect';
 import Payment from './pages/Payment';
@@ -15,7 +16,7 @@ export default function App() {
             <BrowserRouter>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<Schedules />} />
+                    <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/schedules" element={<Schedules />} />

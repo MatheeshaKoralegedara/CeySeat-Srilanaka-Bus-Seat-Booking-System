@@ -1,18 +1,31 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import client from '../api/client';
+import TownAutocomplete from '../components/TownAutocomplete';
 
 export default function Schedules() {
-    const [routeId, setRouteId] = useState('');
+    const [searchParams] = useSearchParams();
+    const [from, setFrom] = useState(searchParams.get('from') || '');
+    const [to, setTo] = useState(searchParams.get('to') || '');
+    const [date, setDate] = useState('');
     const [schedules, setSchedules] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     function search() {
         setLoading(true);
-        const params = routeId.trim() ? { routeId: routeId.trim() } : {};
+        const routeId = from.trim() && to.trim() ? `${from.trim()}-${to.trim()}` : '';
+        const params = routeId ? { routeId } : {};
         client.get('/schedules', { params })
-            .then((res) => setSchedules(res.data))
+            .then((res) => {
+                let results = res.data;
+                if (date) {
+                    results = results.filter((s) =>
+                        s.departureTime.startsWith(date)
+                    );
+                }
+                setSchedules(results);
+            })
             .catch(() => setSchedules([]))
             .finally(() => setLoading(false));
     }
@@ -33,21 +46,32 @@ export default function Schedules() {
                 <p className="text-gray-500">Search available routes across Sri Lanka</p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8 flex gap-3">
-                <input
-                    type="text"
-                    value={routeId}
-                    onChange={(e) => setRouteId(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && search()}
-                    placeholder="e.g. Colombo-Kandy"
-                    className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                />
-                <button
-                    onClick={search}
-                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-                >
-                    Search
-                </button>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" label="From" />
+                    </div>
+                    <div>
+                        <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" label="To" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Date</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <button
+                            onClick={search}
+                            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg transition-colors"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {loading && (
@@ -57,7 +81,7 @@ export default function Schedules() {
             {!loading && schedules.length === 0 && (
                 <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
                     <p className="text-gray-500 text-lg">No schedules found.</p>
-                    <p className="text-gray-400 text-sm mt-1">Try a different route or clear the search.</p>
+                    <p className="text-gray-400 text-sm mt-1">Try a different route or date.</p>
                 </div>
             )}
 

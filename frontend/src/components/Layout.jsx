@@ -14,7 +14,7 @@ export default function Layout({ children }) {
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <header className="bg-brand-700 text-white shadow-md">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link to="/schedules" className="text-2xl font-bold tracking-tight">
+                    <Link to="/" className="text-2xl font-bold tracking-tight">
                         Cey<span className="text-accent-400">Seat</span>
                     </Link>
 
@@ -26,6 +26,12 @@ export default function Layout({ children }) {
                         {user && (
                             <Link to="/bookings" className="hover:text-accent-400 transition-colors">
                                 My Bookings
+                            </Link>
+                        )}
+
+                        {user && (user.role === 'OPERATOR' || user.role === 'ADMIN') && (
+                            <Link to="/dashboard" className="hover:text-accent-400 transition-colors">
+                                Dashboard
                             </Link>
                         )}
 

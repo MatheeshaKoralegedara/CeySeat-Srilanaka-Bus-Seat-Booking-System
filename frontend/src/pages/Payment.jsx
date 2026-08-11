@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import client from '../api/client';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function Payment() {
     const { bookingId } = useParams();
@@ -66,22 +67,70 @@ export default function Payment() {
     }
 
     if (status === 'success') {
-        return (
-            <div className="max-w-md mx-auto text-center py-16">
+    const ticketId = bookingId.slice(-8).toUpperCase();
+    const qrValue = JSON.stringify({ bookingId, orderId: hashData.orderId });
+
+    return (
+        <div className="max-w-md mx-auto">
+            <div className="text-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
                     ✓
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful</h1>
-                <p className="text-gray-500 mb-8">Your seat is confirmed. Safe travels!</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">Booking Confirmed</h1>
+                <p className="text-gray-500">Your e-ticket is ready</p>
+            </div>
+
+            {/* Ticket card */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div className="bg-brand-700 text-white px-6 py-4 flex items-center justify-between">
+                    <span className="font-bold text-lg">
+                        Cey<span className="text-accent-400">Seat</span>
+                    </span>
+                    <span className="text-xs bg-white/20 px-3 py-1 rounded-full font-mono">
+                        #{ticketId}
+                    </span>
+                </div>
+
+                <div className="p-6 flex flex-col items-center">
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 mb-4">
+                        <QRCodeSVG value={qrValue} size={160} />
+                    </div>
+                    <p className="text-xs text-gray-400 mb-6">Show this QR code to the conductor</p>
+
+                    <div className="w-full border-t border-dashed border-gray-200 pt-4 space-y-3 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-gray-500">Amount Paid</span>
+                            <span className="font-semibold text-gray-900">Rs. {hashData.amount}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-500">Payment ID</span>
+                            <span className="font-mono text-xs text-gray-700">{hashData.orderId.slice(-12)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-500">Status</span>
+                            <span className="font-semibold text-green-600">Confirmed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+                <button
+                    onClick={() => window.print()}
+                    className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-colors"
+                >
+                    Download Ticket
+                </button>
                 <Link
                     to="/schedules"
-                    className="inline-block bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+                    className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition-colors text-center"
                 >
-                    Back to Buses
+                    Book Another
                 </Link>
             </div>
-        );
-    }
+        </div>
+    );
+}
 
     if (status === 'dismissed' || status === 'error') {
         return (

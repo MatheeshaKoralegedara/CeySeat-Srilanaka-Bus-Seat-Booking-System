@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import TownAutocomplete from '../components/TownAutocomplete';
 
 const popularRoutes = [
     { from: 'Colombo', to: 'Kandy', duration: '3h', fareFrom: 850 },
@@ -38,22 +39,12 @@ export default function Home() {
                     >
                         <div className="flex-1 text-left">
                             <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">From</label>
-                            <input
-                                value={from}
-                                onChange={(e) => setFrom(e.target.value)}
-                                placeholder="Colombo"
-                                className="w-full text-gray-900 font-medium focus:outline-none"
-                            />
+                                <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" />
                         </div>
-                        <div className="hidden md:block w-px bg-gray-200"></div>
+                    <div className="hidden md:block w-px bg-gray-200"></div>
                         <div className="flex-1 text-left">
                             <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">To</label>
-                            <input
-                                value={to}
-                                onChange={(e) => setTo(e.target.value)}
-                                placeholder="Kandy"
-                                className="w-full text-gray-900 font-medium focus:outline-none"
-                            />
+                                <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" />
                         </div>
                         <button
                             type="submit"

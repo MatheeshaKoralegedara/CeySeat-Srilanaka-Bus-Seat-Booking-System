@@ -13,6 +13,12 @@
   --color-accent-600: #c47c0c;
 }
 
+@media print {
+  header, footer, .no-print {
+    display: none !important;
+  }
+}
+
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;

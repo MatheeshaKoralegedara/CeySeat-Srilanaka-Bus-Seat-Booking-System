@@ -8,6 +8,7 @@ import Schedules from './pages/Schedules';
 import SeatSelect from './pages/SeatSelect';
 import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
+import OperatorDashboard from './pages/OperatorDashboard';
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                     <Route path="/seats/:scheduleId" element={<SeatSelect />} />
                     <Route path="/payment/:bookingId" element={<Payment />} />
                     <Route path="/bookings" element={<MyBookings />} />
+                    <Route path="/dashboard" element={<OperatorDashboard />} />
                 </Routes>
             </Layout>
             </BrowserRouter>

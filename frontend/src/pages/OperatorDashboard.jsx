@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
+import TownAutocomplete from '../components/TownAutocomplete';
 
 export default function OperatorDashboard() {
     const [buses, setBuses] = useState([]);
@@ -10,6 +11,15 @@ export default function OperatorDashboard() {
     const [registrationNo, setRegistrationNo] = useState('');
     const [model, setModel] = useState('');
     const [seatCount, setSeatCount] = useState(40);
+    const [schedules, setSchedules] = useState([]);
+    const [showScheduleForm, setShowScheduleForm] = useState(false);
+    const [selectedBusId, setSelectedBusId] = useState('');
+    const [routeFrom, setRouteFrom] = useState('');
+    const [routeTo, setRouteTo] = useState('');
+    const [departureTime, setDepartureTime] = useState('');
+    const [arrivalTime, setArrivalTime] = useState('');
+    const [fare, setFare] = useState('');
+    const [scheduleError, setScheduleError] = useState('');
 
     function loadBuses() {
         setLoading(true);
@@ -19,8 +29,15 @@ export default function OperatorDashboard() {
             .finally(() => setLoading(false));
     }
 
+    function loadSchedules() {
+        client.get('/schedules/my')
+            .then((res) => setSchedules(res.data))
+            .catch(() => setSchedules([]));
+    }
+
     useEffect(() => {
         loadBuses();
+        loadSchedules();
     }, []);
 
     function generateSeatLayout(count) {
@@ -61,6 +78,30 @@ export default function OperatorDashboard() {
             loadBuses();
         } catch (err) {
             setError(err.response?.data?.error || 'Could not add bus');
+        }
+    }
+
+    async function createSchedule(e) {
+        e.preventDefault();
+        setScheduleError('');
+        try {
+            await client.post('/schedules', {
+                busId: selectedBusId,
+                routeId: `${routeFrom}-${routeTo}`,
+                departureTime,
+                arrivalTime,
+                fare: Number(fare),
+            });
+            setSelectedBusId('');
+            setRouteFrom('');
+            setRouteTo('');
+            setDepartureTime('');
+            setArrivalTime('');
+            setFare('');
+            setShowScheduleForm(false);
+            loadSchedules();
+        } catch (err) {
+            setScheduleError(err.response?.data?.error || 'Could not add schedule');
         }
     }
 
@@ -151,6 +192,113 @@ export default function OperatorDashboard() {
                     </div>
                 ))}
             </div>
+            <div className="flex items-center justify-between mb-6 mt-16">
+    <div>
+        <h2 className="text-2xl font-bold text-gray-900">Schedules</h2>
+        <p className="text-gray-500 text-sm">Assign your buses to routes and times</p>
+    </div>
+    <button
+        onClick={() => setShowScheduleForm(!showScheduleForm)}
+        disabled={buses.length === 0}
+        className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors"
+    >
+        {showScheduleForm ? 'Cancel' : '+ Add Schedule'}
+    </button>
+</div>
+
+{buses.length === 0 && (
+    <p className="text-sm text-gray-400 mb-6">Add a bus first before creating schedules.</p>
+)}
+
+{showScheduleForm && (
+    <form onSubmit={createSchedule} className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Bus</label>
+                <select
+                    value={selectedBusId}
+                    onChange={(e) => setSelectedBusId(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                    <option value="">Select a bus</option>
+                    {buses.map((b) => (
+                        <option key={b.id} value={b.id}>{b.model} — {b.registrationNo}</option>
+                    ))}
+                </select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                    <TownAutocomplete
+                            value={routeFrom}
+                            onChange={setRouteFrom}
+                            placeholder="Colombo"
+                            label="From"
+                    />
+                    <TownAutocomplete
+                        value={routeTo}
+                        onChange={setRouteTo}
+                        placeholder="Kandy"
+                        label="To"
+                    />
+                </div>
+            
+            </div>
+            <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Departure</label>
+                <input
+                    type="datetime-local"
+                    value={departureTime}
+                    onChange={(e) => setDepartureTime(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Arrival</label>
+                <input
+                    type="datetime-local"
+                    value={arrivalTime}
+                    onChange={(e) => setArrivalTime(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Fare (Rs.)</label>
+                <input
+                    type="number"
+                    value={fare}
+                    onChange={(e) => setFare(e.target.value)}
+                    min={0}
+                    required
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+            </div>
+        </div>
+        {scheduleError && <p className="text-red-600 text-sm mb-4">{scheduleError}</p>}
+        <button
+            type="submit"
+            className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors"
+        >
+            Create Schedule
+        </button>
+    </form>
+)}
+
+<div className="grid gap-3">
+    {schedules.map((s) => (
+        <div key={s.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+            <div>
+                <p className="font-semibold text-gray-900">{s.routeId}</p>
+                <p className="text-sm text-gray-500">
+                    {new Date(s.departureTime).toLocaleString()} → {new Date(s.arrivalTime).toLocaleString()}
+                </p>
+            </div>
+            <span className="font-bold text-brand-700">Rs. {s.fare}</span>
+        </div>
+    ))}
+</div>
         </div>
     );
 }

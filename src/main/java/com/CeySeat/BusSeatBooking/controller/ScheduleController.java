@@ -1,7 +1,12 @@
 package com.CeySeat.BusSeatBooking.controller;
 
+import com.CeySeat.BusSeatBooking.exception.NotFoundException;
+import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
+import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -12,9 +17,11 @@ import java.util.List;
 public class ScheduleController {
 
     private final ScheduleRepository scheduleRepository;
+    private final BusRepository busRepository;
 
-    public ScheduleController(ScheduleRepository scheduleRepository) {
+    public ScheduleController(ScheduleRepository scheduleRepository, BusRepository busRepository) {
         this.scheduleRepository = scheduleRepository;
+        this.busRepository = busRepository;
     }
 
     @GetMapping
@@ -45,7 +52,24 @@ public class ScheduleController {
     }
 
     @PostMapping
-    public Schedule addSchedule(@RequestBody Schedule schedule) {
-        return scheduleRepository.save(schedule);
+    public ResponseEntity<Schedule> addSchedule(@RequestBody Schedule schedule, java.security.Principal principal) {
+        Bus bus = busRepository.findById(schedule.getBusId())
+                .orElseThrow(() -> new NotFoundException("Bus not found: " + schedule.getBusId()));
+
+        if (!bus.getOperatorId().equals(principal.getName())) {
+            throw new SecurityException("You can only create schedules for your own buses.");
+        }
+
+        return ResponseEntity.ok(scheduleRepository.save(schedule));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<Schedule>> getMySchedules(java.security.Principal principal) {
+        List<Bus> myBuses = busRepository.findByOperatorId(principal.getName());
+        List<String> myBusIds = myBuses.stream().map(Bus::getId).toList();
+        List<Schedule> schedules = myBusIds.stream()
+                .flatMap(busId -> scheduleRepository.findByBusId(busId).stream())
+                .toList();
+        return ResponseEntity.ok(schedules);
     }
 }

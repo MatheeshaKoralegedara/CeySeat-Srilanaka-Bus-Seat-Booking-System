@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -72,4 +75,11 @@ public class ScheduleController {
                 .toList();
         return ResponseEntity.ok(schedules);
     }
+
+    @GetMapping("/{id}")
+    public Schedule getSchedule(@PathVariable String id) {
+        return scheduleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Schedule not found: " + id));
+    }
+    
 }

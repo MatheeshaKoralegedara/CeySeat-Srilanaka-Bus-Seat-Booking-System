@@ -20,6 +20,9 @@ export default function OperatorDashboard() {
     const [arrivalTime, setArrivalTime] = useState('');
     const [fare, setFare] = useState('');
     const [scheduleError, setScheduleError] = useState('');
+    const [layoutType, setLayoutType] = useState('2+2');
+    const [hasRearBench, setHasRearBench] = useState(false);
+    const [rearBenchSize, setRearBenchSize] = useState(5);
 
     function loadBuses() {
         setLoading(true);
@@ -40,17 +43,61 @@ export default function OperatorDashboard() {
         loadSchedules();
     }, []);
 
-    function generateSeatLayout(count) {
+    function generateSeatLayout(totalSeats, layoutType, hasRearBench, rearBenchSize) {
+        const is3plus2 = layoutType === '3+2';
+        const seatsPerRow = is3plus2 ? 5 : 4;
+        const leftCount = is3plus2 ? 3 : 2;
+
+        const benchCount = hasRearBench ? Number(rearBenchSize) : 0;
+        const frontSeatTarget = Math.max(0, totalSeats - benchCount);
+
+        const fullRows = Math.floor(frontSeatTarget / seatsPerRow);
+        const remainder = frontSeatTarget - fullRows * seatsPerRow;
+
         const seats = [];
-        const rows = Math.ceil(count / 4);
         let seatNum = 1;
 
-        for (let r = 1; r <= rows && seatNum <= count; r++) {
-            for (const col of ['A', 'B', 'C', 'D']) {
-                if (seatNum > count) break;
+        for (let row = 1; row <= fullRows; row++) {
+            for (let pos = 0; pos < seatsPerRow; pos++) {
+                const side = pos < leftCount ? 'left' : 'right';
+                const posInSide = pos < leftCount ? pos : pos - leftCount;
+                const sideSize = pos < leftCount ? leftCount : seatsPerRow - leftCount;
+                const type =
+                    posInSide === 0 ? 'window' :
+                    posInSide === sideSize - 1 ? 'aisle' : 'middle';
+
                 seats.push({
-                    seatNo: `${col}${r}`,
-                    type: col === 'A' || col === 'D' ? 'window' : 'aisle',
+                    seatNo: String(seatNum).padStart(2, '0'),
+                    type,
+                    row,
+                    side,
+                    bookable: true,
+                });
+                seatNum++;
+            }
+        }
+
+        let nextRow = fullRows + 1;
+        for (let i = 0; i < remainder; i++) {
+            seats.push({
+                seatNo: String(seatNum).padStart(2, '0'),
+                type: 'window',
+                row: nextRow,
+                side: 'right',
+                bookable: true,
+            });
+            seatNum++;
+        }
+        if (remainder > 0) nextRow++;
+
+        if (hasRearBench) {
+            for (let i = 0; i < benchCount; i++) {
+                seats.push({
+                    seatNo: String(seatNum).padStart(2, '0'),
+                    type: i === 0 || i === benchCount - 1 ? 'window' : 'middle',
+                    row: nextRow,
+                    side: 'rear',
+                    bookable: true,
                 });
                 seatNum++;
             }
@@ -68,7 +115,8 @@ export default function OperatorDashboard() {
                 registrationNo,
                 model,
                 totalSeats: Number(seatCount),
-                seatLayout: generateSeatLayout(Number(seatCount)),
+                layoutType,
+                seatLayout: generateSeatLayout(Number(seatCount), layoutType, hasRearBench, rearBenchSize),
             });
 
             setRegistrationNo('');
@@ -146,6 +194,42 @@ export default function OperatorDashboard() {
                                 className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
+
+                        <div>
+                           <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Layout</label>
+                              <select
+                                 value={layoutType}
+                                 onChange={(e) => setLayoutType(e.target.value)}
+                                 className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+    >
+                                 <option value="2+2">2+2 (AC / Luxury)</option>
+                                 <option value="3+2">3+2 (Normal / Rural)</option>
+                              </select>
+                        </div>
+
+                        <div className="flex items-center gap-3 md:col-span-3">
+                            <input
+                                type="checkbox"
+                                id="rearBench"
+                                checked={hasRearBench}
+                                onChange={(e) => setHasRearBench(e.target.checked)}
+                                className="w-4 h-4"
+                            />
+                            <label htmlFor="rearBench" className="text-sm text-gray-700">
+                                Include rear bench seat (continuous row across the back)
+                            </label>
+                            {hasRearBench && (
+                                <input
+                                    type="number"
+                                    value={rearBenchSize}
+                                    onChange={(e) => setRearBenchSize(Number(e.target.value))}
+                                    min={3}
+                                    max={6}
+                                    className="w-20 px-2 py-1 rounded-lg border border-gray-300 text-sm"
+                                />
+                            )}
+                        </div>
+
                         <div>
                             <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">
                                 Total Seats

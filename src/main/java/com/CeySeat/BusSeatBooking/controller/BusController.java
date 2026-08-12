@@ -33,4 +33,10 @@ public class BusController {
         bus.setOperatorId(principal.getName());
         return busRepository.save(bus);
     }
+
+    @GetMapping("/{id}")
+    public Bus getBus(@PathVariable String id) {
+        return busRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bus not found: " + id));
+    }
 }

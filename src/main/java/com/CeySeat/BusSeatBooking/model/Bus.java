@@ -15,4 +15,5 @@ public class Bus {
     private String model;
     private int totalSeats;
     private List<Seat> seatLayout;
+    private String layoutType; // "2+2", "3+2", etc.
 }

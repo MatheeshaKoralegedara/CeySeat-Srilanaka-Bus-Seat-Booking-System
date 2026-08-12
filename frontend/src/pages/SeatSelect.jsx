@@ -3,18 +3,46 @@ import { useParams, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
+function groupByRow(seatLayout) {
+    const rows = {};
+    seatLayout.forEach((seat) => {
+        if (!rows[seat.row]) rows[seat.row] = [];
+        rows[seat.row].push(seat);
+    });
+    return Object.keys(rows)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((rowNum) => rows[rowNum]);
+}
+
 export default function SeatSelect() {
     const { scheduleId } = useParams();
+    const [seatLayout, setSeatLayout] = useState([]);
+    const [busInfo, setBusInfo] = useState(null);
     const [bookedSeats, setBookedSeats] = useState([]);
     const [selected, setSelected] = useState(null);
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
     const [reserving, setReserving] = useState(false);
     const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        client.get(`/bookings/${scheduleId}/seats`)
-            .then((res) => setBookedSeats(res.data.map((b) => b.seatNo)));
+        async function load() {
+            try {
+                const scheduleRes = await client.get(`/schedules/${scheduleId}`);
+                const busRes = await client.get(`/buses/${scheduleRes.data.busId}`);
+                const seatsRes = await client.get(`/bookings/${scheduleId}/seats`);
+
+                setBusInfo(busRes.data);
+                setSeatLayout(busRes.data.seatLayout || []);
+                setBookedSeats(seatsRes.data.map((b) => b.seatNo));
+            } catch (err) {
+                setError('Could not load seat map for this bus.');
+            } finally {
+                setLoading(false);
+            }
+        }
+        load();
     }, [scheduleId]);
 
     async function reserve() {
@@ -36,12 +64,9 @@ export default function SeatSelect() {
         }
     }
 
-    // Adjust to match a real bus's seat layout — this is a placeholder grid
-    const allSeats = ['A1', 'A2', 'B1', 'B2', 'B3', 'B4'];
-
-    function seatState(seat) {
-        if (bookedSeats.includes(seat)) return 'taken';
-        if (selected === seat) return 'selected';
+    function seatState(seatNo) {
+        if (bookedSeats.includes(seatNo)) return 'taken';
+        if (selected === seatNo) return 'selected';
         return 'available';
     }
 
@@ -51,31 +76,98 @@ export default function SeatSelect() {
         taken: 'bg-gray-200 border-2 border-gray-200 text-gray-400 cursor-not-allowed',
     };
 
+    if (loading) {
+        return <div className="text-center py-16 text-gray-400">Loading seat map...</div>;
+    }
+
+    if (seatLayout.length === 0) {
+        return (
+            <div className="text-center py-16 bg-white rounded-xl border border-gray-200 max-w-md mx-auto">
+                <p className="text-gray-500">Seat layout unavailable for this bus.</p>
+            </div>
+        );
+    }
+
+    const rows = groupByRow(seatLayout);
+
     return (
         <div className="max-w-md mx-auto">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Select your seat</h1>
-            <p className="text-gray-500 text-sm mb-8">Tap an available seat to select it</p>
+            <p className="text-gray-500 text-sm mb-8">
+                {busInfo?.model} · {busInfo?.totalSeats} seats
+            </p>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-                {/* Driver indicator */}
-                <div className="flex justify-end mb-6">
-                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
-                        🚌
+                <div className="flex justify-end mb-4 pr-1">
+                    <div className="flex items-center gap-2 text-gray-400 text-xs">
+                        <span>🚗</span>
+                        Driver
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    {allSeats.map((seat) => {
-                        const state = seatState(seat);
+                <div className="flex flex-col gap-2 mb-6">
+                    {rows.map((rowSeats, i) => {
+                        const isRearBench = rowSeats[0]?.side === 'rear';
+
+                        if (isRearBench) {
+                            return (
+                                <div key={i} className="flex justify-center gap-2 mt-3 pt-3 border-t border-dashed border-gray-200">
+                                    {rowSeats.map((seat) => {
+                                        const state = seatState(seat.seatNo);
+                                        return (
+                                            <button
+                                                key={seat.seatNo}
+                                                disabled={state === 'taken'}
+                                                onClick={() => setSelected(seat.seatNo)}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors ${seatStyles[state]}`}
+                                            >
+                                                {seat.seatNo}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        }
+
+                        const left = rowSeats.filter((s) => s.side === 'left');
+                        const right = rowSeats.filter((s) => s.side === 'right');
+
                         return (
-                            <button
-                                key={seat}
-                                disabled={state === 'taken'}
-                                onClick={() => setSelected(seat)}
-                                className={`h-14 rounded-lg font-semibold text-sm transition-colors ${seatStyles[state]}`}
-                            >
-                                {seat}
-                            </button>
+                            <div key={i} className="flex items-center justify-center gap-3">
+                                <div className="flex gap-2">
+                                    {left.map((seat) => {
+                                        const state = seatState(seat.seatNo);
+                                        return (
+                                            <button
+                                                key={seat.seatNo}
+                                                disabled={state === 'taken'}
+                                                onClick={() => setSelected(seat.seatNo)}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors ${seatStyles[state]}`}
+                                            >
+                                                {seat.seatNo}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="w-6"></div> {/* aisle */}
+
+                                <div className="flex gap-2">
+                                    {right.map((seat) => {
+                                        const state = seatState(seat.seatNo);
+                                        return (
+                                            <button
+                                                key={seat.seatNo}
+                                                disabled={state === 'taken'}
+                                                onClick={() => setSelected(seat.seatNo)}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors ${seatStyles[state]}`}
+                                            >
+                                                {seat.seatNo}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         );
                     })}
                 </div>
@@ -96,9 +188,7 @@ export default function SeatSelect() {
                 </div>
             </div>
 
-            {error && (
-                <p className="text-red-600 text-sm mt-4 text-center">{error}</p>
-            )}
+            {error && <p className="text-red-600 text-sm mt-4 text-center">{error}</p>}
 
             <button
                 disabled={!selected || reserving}

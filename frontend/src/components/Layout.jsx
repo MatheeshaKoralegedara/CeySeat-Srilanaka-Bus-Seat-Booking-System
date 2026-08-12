@@ -29,6 +29,12 @@ export default function Layout({ children }) {
                             </Link>
                         )}
 
+                        {user && user.role === 'ADMIN' && (
+                            <Link to="/admin" className="hover:text-accent-400 transition-colors">
+                                Admin
+                            </Link>
+                        )}
+
                         {user && (user.role === 'OPERATOR' || user.role === 'ADMIN') && (
                             <Link to="/dashboard" className="hover:text-accent-400 transition-colors">
                                 Dashboard

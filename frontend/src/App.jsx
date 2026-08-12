@@ -9,6 +9,7 @@ import SeatSelect from './pages/SeatSelect';
 import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
 import OperatorDashboard from './pages/OperatorDashboard';
+import AdminPanel from './pages/AdminPanel';
 
 export default function App() {
     return (
@@ -25,6 +26,7 @@ export default function App() {
                     <Route path="/payment/:bookingId" element={<Payment />} />
                     <Route path="/bookings" element={<MyBookings />} />
                     <Route path="/dashboard" element={<OperatorDashboard />} />
+                    <Route path="/admin" element={<AdminPanel />} />
                 </Routes>
             </Layout>
             </BrowserRouter>

@@ -40,7 +40,12 @@
     "taken": "Taken",
     "reserving": "Reserving...",
     "selectToContinue": "Select a seat to continue",
-    "reserveSeat": "Reserve Seat"
+    "reserveSeat": "Reserve Seat",
+    "selectGenderTitle": "Select Gender",
+    "selectGenderNote": "Please be mindful if the next seat is booked by a passenger of the opposite gender.",
+    "male": "Male",
+    "female": "Female",
+    "cancel": "Cancel"
   },
   "payment": {
     "totalAmount": "Total amount",

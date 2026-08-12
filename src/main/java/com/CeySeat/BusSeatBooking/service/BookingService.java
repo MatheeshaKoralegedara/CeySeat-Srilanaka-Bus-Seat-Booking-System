@@ -50,6 +50,7 @@ public class BookingService {
             booking.setStatus(BookingStatus.RESERVED);
             booking.setReservedUntil(LocalDateTime.now().plusMinutes(HOLD_MINUTES));
             booking.setFare(schedule.getFare());
+            booking.setPassengerGender(request.getPassengerGender());
 
             try {
                 saved.add(bookingRepository.save(booking));
@@ -89,7 +90,7 @@ public class BookingService {
 
     private BookingResponse toResponse(Booking b) {
         return new BookingResponse(b.getId(), b.getScheduleId(), b.getSeatNo(),
-                b.getStatus(), b.getReservedUntil(), b.getFare());
+                b.getStatus(), b.getReservedUntil(), b.getFare(), b.getPassengerGender());
     }
 
     public List<BookingResponse> getMyBookings(String userId) {

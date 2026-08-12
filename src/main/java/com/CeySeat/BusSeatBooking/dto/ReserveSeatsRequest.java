@@ -14,4 +14,7 @@ public class ReserveSeatsRequest {
     
     @NotEmpty
     private List<String> seatNumbers;
+    
+    @NotBlank
+    private String passengerGender;
 }

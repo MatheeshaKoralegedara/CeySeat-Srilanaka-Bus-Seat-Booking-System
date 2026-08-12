@@ -39,4 +39,5 @@ public class Booking {
     private LocalDateTime reservedUntil; // hold expiry, only relevant while status=RESERVED
     private String paymentReference;
     private double fare;
+    private String passengerGender;
 }

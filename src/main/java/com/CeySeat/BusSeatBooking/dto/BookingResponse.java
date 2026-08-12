@@ -15,4 +15,5 @@ public class BookingResponse {
     private BookingStatus status;
     private LocalDateTime reservedUntil;
     private double fare;
+    private String passengerGender;
 }

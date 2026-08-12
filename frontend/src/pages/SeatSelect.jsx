@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import { SkeletonBlock } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
+import GenderModal from '../components/GenderModal';
 
 function groupByRow(seatLayout) {
     const rows = {};
@@ -22,10 +23,12 @@ export default function SeatSelect() {
     const [seatLayout, setSeatLayout] = useState([]);
     const [busInfo, setBusInfo] = useState(null);
     const [bookedSeats, setBookedSeats] = useState([]);
+    const [seatGenders, setSeatGenders] = useState({});
     const [selected, setSelected] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [reserving, setReserving] = useState(false);
+    const [showGenderModal, setShowGenderModal] = useState(false);
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -39,6 +42,9 @@ export default function SeatSelect() {
                 setBusInfo(busRes.data);
                 setSeatLayout(busRes.data.seatLayout || []);
                 setBookedSeats(seatsRes.data.map((b) => b.seatNo));
+                const genderMap = {};
+                seatsRes.data.forEach((b) => { genderMap[b.seatNo] = b.passengerGender; });
+                setSeatGenders(genderMap);
             } catch (err) {
                 setError('Could not load seat map for this bus.');
             } finally {
@@ -48,17 +54,23 @@ export default function SeatSelect() {
         load();
     }, [scheduleId]);
 
-    async function reserve() {
+    function handleReserveClick() {
         if (!user) {
             navigate('/login');
             return;
         }
+        setShowGenderModal(true);
+    }
+
+    async function confirmReserve(gender) {
+        setShowGenderModal(false);
         setError('');
         setReserving(true);
         try {
             const res = await client.post('/bookings/reserve', {
                 scheduleId,
                 seatNumbers: [selected],
+                passengerGender: gender,
             });
             navigate(`/payment/${res.data[0].id}`);
         } catch (err) {
@@ -122,7 +134,7 @@ export default function SeatSelect() {
                 <div className="flex justify-end mb-4 pr-1">
                     <div className="flex items-center gap-2 text-gray-400 text-xs">
                         <span>🚗</span>
-                        Driver
+                        {t('seats.driver')}
                     </div>
                 </div>
 
@@ -140,9 +152,14 @@ export default function SeatSelect() {
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
                                                 onClick={() => setSelected(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors ${seatStyles[state]}`}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
+                                                {state === 'taken' && seatGenders[seat.seatNo] && (
+                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                                        seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
+                                                    }`} />
+                                                )}
                                             </button>
                                         );
                                     })}
@@ -163,9 +180,14 @@ export default function SeatSelect() {
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
                                                 onClick={() => setSelected(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors ${seatStyles[state]}`}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
+                                                {state === 'taken' && seatGenders[seat.seatNo] && (
+                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                                        seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
+                                                    }`} />
+                                                )}
                                             </button>
                                         );
                                     })}
@@ -181,9 +203,14 @@ export default function SeatSelect() {
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
                                                 onClick={() => setSelected(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors ${seatStyles[state]}`}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
+                                                {state === 'taken' && seatGenders[seat.seatNo] && (
+                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                                        seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
+                                                    }`} />
+                                                )}
                                             </button>
                                         );
                                     })}
@@ -213,11 +240,17 @@ export default function SeatSelect() {
 
             <button
                 disabled={!selected || reserving}
-                onClick={reserve}
+                onClick={handleReserveClick}
                 className="w-full mt-6 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-4 rounded-xl transition-colors"
             >
                 {reserving ? t('seats.reserving') : selected ? `${t('seats.reserveSeat')} ${selected}` : t('seats.selectToContinue')}
             </button>
+
+            <GenderModal
+                open={showGenderModal}
+                onSelect={confirmReserve}
+                onCancel={() => setShowGenderModal(false)}
+            />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import client from '../api/client';
+import { SkeletonBlock, SkeletonCard } from '../components/Skeleton';
 
 const statusStyles = {
     PAID: 'bg-green-100 text-green-700',
@@ -21,7 +22,15 @@ export default function MyBookings() {
     }, []);
 
     if (loading) {
-        return <div className="text-center py-16 text-gray-400">Loading your bookings...</div>;
+        return (
+            <div>
+                <SkeletonBlock className="h-9 w-48 mb-8" />
+                <div className="grid gap-4">
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </div>
+            </div>
+        );
     }
 
     return (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
+import { SkeletonBlock } from '../components/Skeleton';
 
 const roleOptions = ['USER', 'OPERATOR', 'ADMIN'];
 
@@ -31,7 +32,21 @@ export default function AdminPanel() {
         }
     }
 
-    if (loading) return <div className="text-center py-16 text-gray-400">Loading admin data...</div>;
+    if (loading) {
+        return (
+            <div>
+                <SkeletonBlock className="h-9 w-48 mb-8" />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="bg-white rounded-xl border border-gray-200 p-5">
+                            <SkeletonBlock className="h-4 w-20 mb-2" />
+                            <SkeletonBlock className="h-8 w-16" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div>

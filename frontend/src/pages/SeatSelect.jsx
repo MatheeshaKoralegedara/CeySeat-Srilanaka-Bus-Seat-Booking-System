@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import client from '../api/client';
+import { SkeletonBlock } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 
 function groupByRow(seatLayout) {
@@ -79,7 +80,25 @@ export default function SeatSelect() {
     };
 
     if (loading) {
-        return <div className="text-center py-16 text-gray-400">Loading seat map...</div>;
+        return (
+            <div className="max-w-md mx-auto">
+                <SkeletonBlock className="h-8 w-48 mb-2" />
+                <SkeletonBlock className="h-4 w-32 mb-8" />
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                    <div className="flex flex-col gap-2">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="flex justify-center gap-3">
+                                <SkeletonBlock className="w-11 h-11" />
+                                <SkeletonBlock className="w-11 h-11" />
+                                <div className="w-6" />
+                                <SkeletonBlock className="w-11 h-11" />
+                                <SkeletonBlock className="w-11 h-11" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (seatLayout.length === 0) {

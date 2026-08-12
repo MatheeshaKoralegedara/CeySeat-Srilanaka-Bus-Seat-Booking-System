@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import client from '../api/client';
+import { SkeletonBlock } from '../components/Skeleton';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function Payment() {
@@ -62,8 +63,12 @@ export default function Payment() {
 
     if (!hashData) {
         return (
-            <div className="max-w-md mx-auto text-center py-16 text-gray-400">
-                Loading payment details...
+            <div className="max-w-md mx-auto">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                    <SkeletonBlock className="h-4 w-24 mx-auto mb-2" />
+                    <SkeletonBlock className="h-10 w-32 mx-auto mb-8" />
+                    <SkeletonBlock className="h-14 w-full rounded-xl" />
+                </div>
             </div>
         );
     }

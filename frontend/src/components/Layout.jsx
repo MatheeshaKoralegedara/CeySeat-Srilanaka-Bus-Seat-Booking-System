@@ -1,10 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import RouteTransition from './RouteTransition';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const { t, i18n } = useTranslation();
 
     function handleLogout() {
@@ -19,6 +21,7 @@ export default function Layout({ children }) {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
+            <RouteTransition />
             <header className="bg-brand-700 text-white shadow-md">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link to="/" className="text-2xl font-bold tracking-tight">
@@ -88,7 +91,7 @@ export default function Layout({ children }) {
                 </div>
             </header>
 
-            <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+            <main key={location.pathname} className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 fade-in">
                 {children}
             </main>
 

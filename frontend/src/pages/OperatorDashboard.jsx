@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
 import TownAutocomplete from '../components/TownAutocomplete';
+import { SkeletonBlock, SkeletonCard } from '../components/Skeleton';
 
 export default function OperatorDashboard() {
     const [buses, setBuses] = useState([]);
@@ -255,7 +256,12 @@ export default function OperatorDashboard() {
                 </form>
             )}
 
-            {loading && <div className="text-center py-12 text-gray-400">Loading fleet...</div>}
+            {loading && (
+                <div className="grid md:grid-cols-2 gap-4">
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </div>
+            )}
 
             {!loading && buses.length === 0 && (
                 <div className="text-center py-16 bg-white rounded-xl border border-gray-200">

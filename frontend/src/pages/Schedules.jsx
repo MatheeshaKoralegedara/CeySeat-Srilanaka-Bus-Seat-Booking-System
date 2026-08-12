@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import TownAutocomplete from '../components/TownAutocomplete';
+import { SkeletonCard } from '../components/Skeleton';
 
 export default function Schedules() {
     const { t } = useTranslation();
@@ -77,7 +78,11 @@ export default function Schedules() {
             </div>
 
             {loading && (
-                <div className="text-center py-12 text-gray-400">{t('schedules.loading')}</div>
+                <div className="grid gap-4">
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </div>
             )}
 
             {!loading && schedules.length === 0 && (

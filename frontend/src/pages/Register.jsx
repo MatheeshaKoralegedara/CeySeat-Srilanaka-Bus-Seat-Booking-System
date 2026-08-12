@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
+    const { t } = useTranslation();
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -29,12 +31,12 @@ export default function Register() {
     return (
         <div className="max-w-sm mx-auto">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">Create your account</h1>
-                <p className="text-gray-500 text-sm mb-6 text-center">Book bus seats across Sri Lanka</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">{t('auth.createAccount')}</h1>
+                <p className="text-gray-500 text-sm mb-6 text-center">{t('auth.registerSubtitle')}</p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.fullName')}</label>
                         <input
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
@@ -44,7 +46,7 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.email')}</label>
                         <input
                             type="email"
                             value={email}
@@ -55,7 +57,7 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.password')}</label>
                         <input
                             type="password"
                             value={password}
@@ -64,11 +66,11 @@ export default function Register() {
                             minLength={8}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         />
-                        <p className="text-xs text-gray-400 mt-1">Minimum 8 characters</p>
+                        <p className="text-xs text-gray-400 mt-1">{t('auth.minChars')}</p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.phone')}</label>
                         <input
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
@@ -88,14 +90,14 @@ export default function Register() {
                         disabled={loading}
                         className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-semibold py-3 rounded-lg transition-colors"
                     >
-                        {loading ? 'Creating account...' : 'Register'}
+                        {loading ? t('auth.creatingAccount') : t('auth.register')}
                     </button>
                 </form>
 
                 <p className="text-center text-sm text-gray-500 mt-6">
-                    Already have an account?{' '}
+                    {t('auth.haveAccount')}{' '}
                     <Link to="/login" className="text-brand-600 font-semibold hover:underline">
-                        Log In
+                        {t('auth.logIn')}
                     </Link>
                 </p>
             </div>

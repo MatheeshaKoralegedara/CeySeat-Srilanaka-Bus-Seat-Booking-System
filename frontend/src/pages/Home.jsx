@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TownAutocomplete from '../components/TownAutocomplete';
 
 const popularRoutes = [
@@ -10,6 +11,7 @@ const popularRoutes = [
 ];
 
 export default function Home() {
+    const { t } = useTranslation();
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');
     const navigate = useNavigate();
@@ -27,10 +29,10 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900 opacity-95"></div>
                 <div className="relative px-8 py-16 md:py-24 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                        Travel Sri Lanka, <span className="text-accent-400">seat by seat</span>
+                        {t('home.heroTitle')}
                     </h1>
                     <p className="text-brand-100 text-lg mb-10 max-w-xl mx-auto">
-                        Book your bus seat in minutes. Real-time availability, secure payment, instant confirmation.
+                        {t('home.heroSubtitle')}
                     </p>
 
                     <form
@@ -38,19 +40,19 @@ export default function Home() {
                         className="bg-white rounded-2xl shadow-xl p-4 md:p-6 max-w-2xl mx-auto flex flex-col md:flex-row gap-3"
                     >
                         <div className="flex-1 text-left">
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">From</label>
-                                <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" />
+                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">{t('home.from')}</label>
+                                <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" label={t('home.from')} />
                         </div>
                     <div className="hidden md:block w-px bg-gray-200"></div>
                         <div className="flex-1 text-left">
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">To</label>
-                                <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" />
+                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">{t('home.to')}</label>
+                                <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" label={t('home.to')} />
                         </div>
                         <button
                             type="submit"
                             className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-8 py-3 rounded-xl transition-colors whitespace-nowrap"
                         >
-                            Search Buses
+                            {t('home.search')}
                         </button>
                     </form>
                 </div>
@@ -59,10 +61,10 @@ export default function Home() {
             {/* Trust badges */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16 text-center">
                 {[
-                    { label: 'Secure Payments', icon: '🔒' },
-                    { label: 'Instant Confirmation', icon: '⚡' },
-                    { label: 'Verified Operators', icon: '✓' },
-                    { label: '24/7 Support', icon: '💬' },
+                    { label: t('home.secure'), icon: '🔒' },
+                    { label: t('home.instant'), icon: '⚡' },
+                    { label: t('home.verified'), icon: '✓' },
+                    { label: t('home.support'), icon: '💬' },
                 ].map((item) => (
                     <div key={item.label} className="flex flex-col items-center gap-2">
                         <span className="text-3xl">{item.icon}</span>
@@ -73,7 +75,7 @@ export default function Home() {
 
             {/* Popular routes */}
             <div className="mb-16">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Routes</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('home.popularRoutes')}</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {popularRoutes.map((r) => (
                         <button
@@ -83,7 +85,7 @@ export default function Home() {
                         >
                             <p className="font-semibold text-gray-900">{r.from} → {r.to}</p>
                             <p className="text-sm text-gray-500 mt-1">{r.duration} journey</p>
-                            <p className="text-brand-700 font-bold mt-3">From Rs. {r.fareFrom}</p>
+                            <p className="text-brand-700 font-bold mt-3">{t('home.fromPrice')} {r.fareFrom}</p>
                         </button>
                     ))}
                 </div>

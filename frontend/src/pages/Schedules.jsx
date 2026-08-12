@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import TownAutocomplete from '../components/TownAutocomplete';
 
 export default function Schedules() {
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const [from, setFrom] = useState(searchParams.get('from') || '');
     const [to, setTo] = useState(searchParams.get('to') || '');
@@ -42,20 +44,20 @@ export default function Schedules() {
     return (
         <div>
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Find your bus</h1>
-                <p className="text-gray-500">Search available routes across Sri Lanka</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('schedules.title')}</h1>
+                <p className="text-gray-500">{t('schedules.subtitle')}</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div>
-                        <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" label="From" />
+                        <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" label={t('home.from')} />
                     </div>
                     <div>
-                        <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" label="To" />
+                        <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" label={t('home.to')} />
                     </div>
                     <div>
-                        <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Date</label>
+                        <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">{t('schedules.date')}</label>
                         <input
                             type="date"
                             value={date}
@@ -68,20 +70,20 @@ export default function Schedules() {
                             onClick={search}
                             className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg transition-colors"
                         >
-                            Search
+                            {t('schedules.search')}
                         </button>
                     </div>
                 </div>
             </div>
 
             {loading && (
-                <div className="text-center py-12 text-gray-400">Loading schedules...</div>
+                <div className="text-center py-12 text-gray-400">{t('schedules.loading')}</div>
             )}
 
             {!loading && schedules.length === 0 && (
                 <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-                    <p className="text-gray-500 text-lg">No schedules found.</p>
-                    <p className="text-gray-400 text-sm mt-1">Try a different route or date.</p>
+                    <p className="text-gray-500 text-lg">{t('schedules.noResults')}</p>
+                    <p className="text-gray-400 text-sm mt-1">{t('schedules.tryDifferent')}</p>
                 </div>
             )}
 
@@ -108,7 +110,7 @@ export default function Schedules() {
                                 onClick={() => navigate(`/seats/${s.id}`)}
                                 className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-5 py-2 rounded-lg transition-colors"
                             >
-                                Select Seats
+                                {t('schedules.selectSeats')}
                             </button>
                         </div>
                     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,6 +16,7 @@ function groupByRow(seatLayout) {
 }
 
 export default function SeatSelect() {
+    const { t } = useTranslation();
     const { scheduleId } = useParams();
     const [seatLayout, setSeatLayout] = useState([]);
     const [busInfo, setBusInfo] = useState(null);
@@ -92,7 +94,7 @@ export default function SeatSelect() {
 
     return (
         <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Select your seat</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('seats.title')}</h1>
             <p className="text-gray-500 text-sm mb-8">
                 {busInfo?.model} · {busInfo?.totalSeats} seats
             </p>
@@ -175,15 +177,15 @@ export default function SeatSelect() {
                 <div className="flex items-center justify-center gap-6 text-xs text-gray-500 pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded border-2 border-gray-300 bg-white"></div>
-                        Available
+                        {t('seats.available')}
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded bg-brand-600"></div>
-                        Selected
+                        {t('seats.selected')}
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded bg-gray-200"></div>
-                        Taken
+                        {t('seats.taken')}
                     </div>
                 </div>
             </div>
@@ -195,7 +197,7 @@ export default function SeatSelect() {
                 onClick={reserve}
                 className="w-full mt-6 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-4 rounded-xl transition-colors"
             >
-                {reserving ? 'Reserving...' : selected ? `Reserve Seat ${selected}` : 'Select a seat to continue'}
+                {reserving ? t('seats.reserving') : selected ? `${t('seats.reserveSeat')} ${selected}` : t('seats.selectToContinue')}
             </button>
         </div>
     );

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function Payment() {
+    const { t } = useTranslation();
     const { bookingId } = useParams();
     const [hashData, setHashData] = useState(null);
     const [status, setStatus] = useState('idle'); // idle | processing | success | error | dismissed
@@ -76,8 +78,8 @@ export default function Payment() {
                 <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
                     ✓
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">Booking Confirmed</h1>
-                <p className="text-gray-500">Your e-ticket is ready</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('payment.confirmed')}</h1>
+                <p className="text-gray-500">{t('payment.ticketReady')}</p>
             </div>
 
             {/* Ticket card */}
@@ -95,20 +97,20 @@ export default function Payment() {
                     <div className="bg-white p-3 rounded-xl border border-gray-100 mb-4">
                         <QRCodeSVG value={qrValue} size={160} />
                     </div>
-                    <p className="text-xs text-gray-400 mb-6">Show this QR code to the conductor</p>
+                    <p className="text-xs text-gray-400 mb-6">{t('payment.showQr')}</p>
 
                     <div className="w-full border-t border-dashed border-gray-200 pt-4 space-y-3 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Amount Paid</span>
+                            <span className="text-gray-500">{t('payment.amountPaid')}</span>
                             <span className="font-semibold text-gray-900">Rs. {hashData.amount}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Payment ID</span>
+                            <span className="text-gray-500">{t('payment.paymentId')}</span>
                             <span className="font-mono text-xs text-gray-700">{hashData.orderId.slice(-12)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Status</span>
-                            <span className="font-semibold text-green-600">Confirmed</span>
+                            <span className="text-gray-500">{t('payment.status')}</span>
+                            <span className="font-semibold text-green-600">{t('payment.confirmedStatus')}</span>
                         </div>
                     </div>
                 </div>
@@ -119,13 +121,13 @@ export default function Payment() {
                     onClick={() => window.print()}
                     className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-colors"
                 >
-                    Download Ticket
+                    {t('payment.download')}
                 </button>
                 <Link
                     to="/schedules"
                     className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition-colors text-center"
                 >
-                    Book Another
+                    {t('payment.bookAnother')}
                 </Link>
             </div>
         </div>
@@ -159,7 +161,7 @@ export default function Payment() {
     return (
         <div className="max-w-md mx-auto">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-                <p className="text-gray-500 text-sm mb-1">Total amount</p>
+                <p className="text-gray-500 text-sm mb-1">{t('payment.totalAmount')}</p>
                 <p className="text-4xl font-bold text-brand-700 mb-8">Rs. {hashData.amount}</p>
 
                 <button
@@ -167,11 +169,11 @@ export default function Payment() {
                     disabled={status === 'processing'}
                     className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 text-brand-900 font-semibold py-4 rounded-xl transition-colors"
                 >
-                    {status === 'processing' ? 'Processing...' : 'Pay with PayHere'}
+                    {status === 'processing' ? t('payment.processing') : t('payment.payWith')}
                 </button>
 
                 <p className="text-xs text-gray-400 mt-4">
-                    Secure payment powered by PayHere
+                    {t('payment.secureNote')}
                 </p>
             </div>
         </div>

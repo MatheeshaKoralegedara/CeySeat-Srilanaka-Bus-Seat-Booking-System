@@ -93,3 +93,22 @@ h1, h2, h3, .font-display {
   background-color: var(--color-accent-400);
   color: var(--color-brand-900);
 }
+
+@keyframes festiveFall {
+    0% {
+        transform: translateY(-20px) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    15% { opacity: 0.7; }
+    85% { opacity: 0.7; }
+    100% {
+        transform: translateY(90px) translateX(15px) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+.animate-festive-fall {
+    animation-name: festiveFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}

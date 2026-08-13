@@ -4,6 +4,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import RouteTransition from './RouteTransition';
 import logo from '../assets/CEYSEAT.png';
+import FestiveOverlay from './FestivalOverlay';
+import TimeGreeting from './TimeGreeting';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
@@ -25,11 +27,15 @@ export default function Layout({ children }) {
     return (
         <div className="min-h-screen bg-[#f8f7f5] dark:bg-[#14181c] flex flex-col">
             <RouteTransition />
-            <header className="bg-brand-700 text-white shadow-lg shadow-brand-900/10 sticky top-0 z-30 border-b border-brand-800/50">
-                <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/" className="flex items-center">
-                        <img src={logo} alt="CeySeat" className="h-20 w-auto" />
-                    </Link>
+            <header className="relative overflow-hidden bg-brand-700 text-white shadow-lg shadow-brand-900/10 sticky top-0 z-30 border-b border-brand-800/50">
+                <FestiveOverlay />
+                <div className="relative z-10 max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link to="/" className="flex items-center">
+                            <img src={logo} alt="CeySeat" className="h-20 w-auto" />
+                        </Link>
+                        
+                    </div>
 
                     <nav className="flex items-center gap-5 text-sm font-medium">
                         <select
@@ -104,7 +110,9 @@ export default function Layout({ children }) {
                                 >
                                     {t('nav.signup')}
                                 </Link>
+                                <TimeGreeting />
                             </div>
+                            
                         )}
                     </nav>
                 </div>

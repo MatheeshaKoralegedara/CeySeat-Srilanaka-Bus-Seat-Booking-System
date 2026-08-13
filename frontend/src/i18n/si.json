@@ -78,5 +78,11 @@
     "minChars": "අවම අක්ෂර 8 ක්",
     "creatingAccount": "ගිණුම සාදමින්...",
     "haveAccount": "දැනටමත් ගිණුමක් තිබේද?"
+  },
+  "greeting": {
+    "morning": "සුභ උදෑසනක්",
+    "afternoon": "සුභ දහවලක්",
+    "evening": "සුභ සන්ධ්‍යාවක්",
+    "night": "සුභ රාත්‍රියක්"
   }
 }

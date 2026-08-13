@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -24,9 +25,15 @@ export default function App() {
                     <Route path="/schedules" element={<Schedules />} />
                     <Route path="/seats/:scheduleId" element={<SeatSelect />} />
                     <Route path="/payment/:bookingId" element={<Payment />} />
-                    <Route path="/bookings" element={<MyBookings />} />
-                    <Route path="/dashboard" element={<OperatorDashboard />} />
-                    <Route path="/admin" element={<AdminPanel />} />
+                    <Route path="/bookings" element={
+                            <ProtectedRoute><MyBookings /></ProtectedRoute>
+                    } />
+                    <Route path="/dashboard" element={
+                            <ProtectedRoute roles={['OPERATOR', 'ADMIN']}><OperatorDashboard /></ProtectedRoute>
+                    } />
+                    <Route path="/admin" element={
+                            <ProtectedRoute roles={['ADMIN']}><AdminPanel /></ProtectedRoute>
+                    } />
                 </Routes>
             </Layout>
             </BrowserRouter>

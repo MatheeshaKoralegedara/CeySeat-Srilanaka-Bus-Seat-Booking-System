@@ -32,16 +32,6 @@ public class BookingController {
                 .body(bookingService.reserveSeats(request, principal.getName()));
     }
 
-    @PostMapping("/{bookingId}/pay")
-    public ResponseEntity<BookingResponse> pay(@PathVariable String bookingId,
-                                                @RequestParam String paymentRef,
-                                               java.security.Principal principal) {
-        // userId as a request param is temporary until auth is added, at
-        // which point this should come from the authenticated principal
-        // instead of a caller-supplied value.
-        return ResponseEntity.ok(bookingService.payBooking(bookingId, paymentRef, principal.getName()));
-    }
-
     @GetMapping("/my")
     public ResponseEntity<List<BookingResponse>> getMyBookings(java.security.Principal principal) {
         return ResponseEntity.ok(bookingService.getMyBookings(principal.getName()));

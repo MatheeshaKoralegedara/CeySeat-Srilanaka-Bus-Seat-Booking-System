@@ -45,12 +45,12 @@ export default function Schedules() {
     return (
         <div>
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('schedules.title')}</h1>
+                <h1 className="font-display text-3xl font-bold text-gray-900 mb-2">{t('schedules.title')}</h1>
                 <p className="text-gray-500">{t('schedules.subtitle')}</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
                     <div>
                         <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" label={t('home.from')} />
                     </div>
@@ -66,10 +66,10 @@ export default function Schedules() {
                             className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                     </div>
-                    <div className="flex items-end">
+                    <div>
                         <button
                             onClick={search}
-                            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg transition-colors"
+                            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg transition-colors shadow-sm"
                         >
                             {t('schedules.search')}
                         </button>
@@ -96,15 +96,22 @@ export default function Schedules() {
                 {schedules.map((s) => (
                     <div
                         key={s.id}
-                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-md transition-shadow"
+                        className="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-lg hover:shadow-brand-900/5 hover:border-brand-200 transition-all"
                     >
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                                {s.routeId}
-                            </h2>
-                            <p className="text-gray-500 text-sm">
-                                {formatDate(s.departureTime)} → {formatDate(s.arrivalTime)}
-                            </p>
+                        <div className="flex items-center gap-4">
+                            <div className="hidden sm:flex w-11 h-11 rounded-lg bg-brand-50 text-brand-600 items-center justify-center flex-shrink-0">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="font-display text-xl font-semibold text-gray-900 mb-1">
+                                    {s.routeId}
+                                </h2>
+                                <p className="text-gray-500 text-sm">
+                                    {formatDate(s.departureTime)} → {formatDate(s.arrivalTime)}
+                                </p>
+                            </div>
                         </div>
 
                         <div className="text-right flex flex-col items-end gap-2">
@@ -113,7 +120,7 @@ export default function Schedules() {
                             </span>
                             <button
                                 onClick={() => navigate(`/seats/${s.id}`)}
-                                className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-5 py-2 rounded-lg transition-colors"
+                                className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-5 py-2 rounded-lg transition-colors shadow-sm shadow-accent-600/20"
                             >
                                 {t('schedules.selectSeats')}
                             </button>

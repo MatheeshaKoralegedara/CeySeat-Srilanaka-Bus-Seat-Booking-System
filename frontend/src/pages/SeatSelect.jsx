@@ -86,9 +86,9 @@ export default function SeatSelect() {
     }
 
     const seatStyles = {
-        available: 'bg-white border-2 border-gray-300 text-gray-700 hover:border-brand-500 hover:bg-brand-50 cursor-pointer',
-        selected: 'bg-brand-600 border-2 border-brand-600 text-white cursor-pointer',
-        taken: 'bg-gray-200 border-2 border-gray-200 text-gray-400 cursor-not-allowed',
+        available: 'bg-white border-2 border-gray-300 text-gray-700 hover:border-brand-500 hover:bg-brand-50 hover:-translate-y-0.5 cursor-pointer shadow-sm',
+        selected: 'bg-brand-600 border-2 border-brand-600 text-white cursor-pointer shadow-md shadow-brand-600/30 scale-105',
+        taken: 'bg-gray-100 border-2 border-gray-100 text-gray-300 cursor-not-allowed',
     };
 
     if (loading) {
@@ -125,15 +125,18 @@ export default function SeatSelect() {
 
     return (
         <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('seats.title')}</h1>
+            <h1 className="font-display text-2xl font-bold text-gray-900 mb-1">{t('seats.title')}</h1>
             <p className="text-gray-500 text-sm mb-8">
                 {busInfo?.model} · {busInfo?.totalSeats} seats
             </p>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
                 <div className="flex justify-end mb-4 pr-1">
-                    <div className="flex items-center gap-2 text-gray-400 text-xs">
-                        <span>🚗</span>
+                    <div className="flex items-center gap-1.5 text-gray-400 text-xs font-medium">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="8" />
+                            <path strokeLinecap="round" d="M12 4v4m0 8v4m8-8h-4M8 12H4" />
+                        </svg>
                         {t('seats.driver')}
                     </div>
                 </div>
@@ -152,7 +155,7 @@ export default function SeatSelect() {
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
                                                 onClick={() => setSelected(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors relative ${seatStyles[state]}`}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
                                                 {state === 'taken' && seatGenders[seat.seatNo] && (
@@ -180,7 +183,7 @@ export default function SeatSelect() {
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
                                                 onClick={() => setSelected(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors relative ${seatStyles[state]}`}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
                                                 {state === 'taken' && seatGenders[seat.seatNo] && (
@@ -203,7 +206,7 @@ export default function SeatSelect() {
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
                                                 onClick={() => setSelected(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-colors relative ${seatStyles[state]}`}
+                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
                                                 {state === 'taken' && seatGenders[seat.seatNo] && (
@@ -236,12 +239,14 @@ export default function SeatSelect() {
                 </div>
             </div>
 
-            {error && <p className="text-red-600 text-sm mt-4 text-center">{error}</p>}
+            {error && (
+                <p className="text-red-600 text-sm mt-4 text-center bg-red-50 border border-red-100 rounded-lg px-4 py-2">{error}</p>
+            )}
 
             <button
                 disabled={!selected || reserving}
                 onClick={handleReserveClick}
-                className="w-full mt-6 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-4 rounded-xl transition-colors"
+                className="w-full mt-6 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-4 rounded-xl transition-colors shadow-md shadow-accent-600/25 disabled:shadow-none"
             >
                 {reserving ? t('seats.reserving') : selected ? `${t('seats.reserveSeat')} ${selected}` : t('seats.selectToContinue')}
             </button>

@@ -9,10 +9,17 @@ export default function Payment() {
     const { t } = useTranslation();
     const { bookingId } = useParams();
     const [hashData, setHashData] = useState(null);
+    const [loadError, setLoadError] = useState('');
     const [status, setStatus] = useState('idle'); // idle | processing | success | error | dismissed
 
     useEffect(() => {
-        client.post('/payments/hash', { bookingId }).then((res) => setHashData(res.data));
+        setLoadError('');
+        setHashData(null);
+        client.post('/payments/hash', { bookingId })
+            .then((res) => setHashData(res.data))
+            .catch((err) => {
+                setLoadError(err.response?.data?.error || 'Could not load this booking for payment. It may have expired or already been paid.');
+            });
     }, [bookingId]);
 
     useEffect(() => {
@@ -45,7 +52,7 @@ export default function Payment() {
         window.payhere.startPayment({
             sandbox: true,
             merchant_id: hashData.merchantId,
-            notify_url: 'https://earpiece-extinct-bucktooth.ngrok-free.dev/api/payments/notify',
+            notify_url: hashData.notifyUrl,
             order_id: hashData.orderId,
             items: 'Bus seat booking',
             amount: hashData.amount,
@@ -59,6 +66,26 @@ export default function Payment() {
             country: 'Sri Lanka',
             hash: hashData.hash,
         });
+    }
+
+    if (loadError) {
+        return (
+            <div className="max-w-md mx-auto text-center py-16">
+                <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.008M12 3l9 16.5H3L12 3z" />
+                    </svg>
+                </div>
+                <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">Can't Load This Payment</h1>
+                <p className="text-gray-500 mb-8">{loadError}</p>
+                <Link
+                    to="/bookings"
+                    className="inline-block bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-sm"
+                >
+                    Back to My Bookings
+                </Link>
+            </div>
+        );
     }
 
     if (!hashData) {
@@ -80,31 +107,34 @@ export default function Payment() {
     return (
         <div className="max-w-md mx-auto">
             <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
-                    ✓
+                <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('payment.confirmed')}</h1>
+                <h1 className="font-display text-2xl font-bold text-gray-900 mb-1">{t('payment.confirmed')}</h1>
                 <p className="text-gray-500">{t('payment.ticketReady')}</p>
             </div>
 
             {/* Ticket card */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl shadow-brand-900/10 border border-gray-100 overflow-hidden">
                 <div className="bg-brand-700 text-white px-6 py-4 flex items-center justify-between">
-                    <span className="font-bold text-lg">
-                        Cey<span className="text-accent-400">Seat</span>
-                    </span>
-                    <span className="text-xs bg-white/20 px-3 py-1 rounded-full font-mono">
+                    <img src="/CEYSEAT.png" alt="CeySeat" className="h-8 w-auto bg-white rounded px-1.5 py-0.5" />
+                    <span className="text-xs bg-white/15 px-3 py-1 rounded-full font-mono tracking-wide">
                         #{ticketId}
                     </span>
                 </div>
 
-                <div className="p-6 flex flex-col items-center">
-                    <div className="bg-white p-3 rounded-xl border border-gray-100 mb-4">
-                        <QRCodeSVG value={qrValue} size={160} />
+                <div className="relative p-6 flex flex-col items-center">
+                    <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-[#f8f7f5]"></div>
+                    <div className="absolute right-0 top-0 translate-x-1/2 w-6 h-6 rounded-full bg-[#f8f7f5]"></div>
+
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 mb-4 shadow-sm">
+                        <QRCodeSVG value={qrValue} size={160} fgColor="#551523" />
                     </div>
                     <p className="text-xs text-gray-400 mb-6">{t('payment.showQr')}</p>
 
-                    <div className="w-full border-t border-dashed border-gray-200 pt-4 space-y-3 text-sm">
+                    <div className="w-full border-t-2 border-dashed border-gray-200 pt-4 space-y-3 text-sm">
                         <div className="flex justify-between">
                             <span className="text-gray-500">{t('payment.amountPaid')}</span>
                             <span className="font-semibold text-gray-900">Rs. {hashData.amount}</span>
@@ -113,9 +143,12 @@ export default function Payment() {
                             <span className="text-gray-500">{t('payment.paymentId')}</span>
                             <span className="font-mono text-xs text-gray-700">{hashData.orderId.slice(-12)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                             <span className="text-gray-500">{t('payment.status')}</span>
-                            <span className="font-semibold text-green-600">{t('payment.confirmedStatus')}</span>
+                            <span className="inline-flex items-center gap-1.5 font-semibold text-green-600">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                {t('payment.confirmedStatus')}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -130,7 +163,7 @@ export default function Payment() {
                 </button>
                 <Link
                     to="/schedules"
-                    className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition-colors text-center"
+                    className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition-colors text-center shadow-sm"
                 >
                     {t('payment.bookAnother')}
                 </Link>
@@ -142,10 +175,12 @@ export default function Payment() {
     if (status === 'dismissed' || status === 'error') {
         return (
             <div className="max-w-md mx-auto text-center py-16">
-                <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl mx-auto mb-4">
-                    ✕
+                <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">
                     {status === 'dismissed' ? 'Payment Cancelled' : 'Something Went Wrong'}
                 </h1>
                 <p className="text-gray-500 mb-8">
@@ -155,7 +190,7 @@ export default function Payment() {
                 </p>
                 <button
                     onClick={() => setStatus('idle')}
-                    className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-3 rounded-lg transition-colors"
+                    className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-3 rounded-lg transition-colors shadow-sm shadow-accent-600/25"
                 >
                     Try Again
                 </button>
@@ -166,18 +201,26 @@ export default function Payment() {
     return (
         <div className="max-w-md mx-auto">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
                 <p className="text-gray-500 text-sm mb-1">{t('payment.totalAmount')}</p>
-                <p className="text-4xl font-bold text-brand-700 mb-8">Rs. {hashData.amount}</p>
+                <p className="font-display text-4xl font-bold text-brand-700 mb-8">Rs. {hashData.amount}</p>
 
                 <button
                     onClick={pay}
                     disabled={status === 'processing'}
-                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 text-brand-900 font-semibold py-4 rounded-xl transition-colors"
+                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 text-brand-900 font-semibold py-4 rounded-xl transition-colors shadow-md shadow-accent-600/25 disabled:shadow-none"
                 >
                     {status === 'processing' ? t('payment.processing') : t('payment.payWith')}
                 </button>
 
-                <p className="text-xs text-gray-400 mt-4">
+                <p className="text-xs text-gray-400 mt-4 flex items-center justify-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
                     {t('payment.secureNote')}
                 </p>
             </div>

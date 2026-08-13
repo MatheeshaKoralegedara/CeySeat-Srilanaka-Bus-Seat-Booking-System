@@ -41,7 +41,8 @@ public class PaymentController {
                 booking.getId(),
                 formattedAmount,
                 "LKR",
-                hash
+                hash,
+                payHereService.getNotifyUrl()
         ));
     }
 }

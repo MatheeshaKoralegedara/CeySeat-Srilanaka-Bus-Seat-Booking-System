@@ -16,8 +16,15 @@ public class PayHereService {
     @Value("${payhere.merchant-secret}")
     private String merchantSecret;
 
+    @Value("${payhere.notify-url}")
+    private String notifyUrl;
+
     public String getMerchantId() {
         return merchantId;
+    }
+
+    public String getNotifyUrl() {
+        return notifyUrl;
     }
 
     public String generateHash(String orderId, double amount) {

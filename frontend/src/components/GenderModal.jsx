@@ -5,9 +5,9 @@ export default function GenderModal({ open, onSelect, onCancel }) {
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-2">{t('seats.selectGenderTitle') || 'Select Gender'}</h2>
+        <div className="fixed inset-0 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 scale-in">
+                <h2 className="font-display text-lg font-bold text-gray-900 mb-2">{t('seats.selectGenderTitle') || 'Select Gender'}</h2>
                 <p className="text-sm text-gray-500 mb-6">
                     {t('seats.selectGenderNote') || 'Please be mindful if the next seat is booked by a passenger of the opposite gender.'}
                 </p>

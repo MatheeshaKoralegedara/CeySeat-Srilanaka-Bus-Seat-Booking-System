@@ -12,5 +12,6 @@ public class PaymentHashResponse {
     private String amount;
     private String currency;
     private String hash;
-    
+    private String notifyUrl;
+
 }

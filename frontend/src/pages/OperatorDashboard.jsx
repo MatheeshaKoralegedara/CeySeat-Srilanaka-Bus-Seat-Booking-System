@@ -158,12 +158,12 @@ export default function OperatorDashboard() {
         <div>
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">My Fleet</h1>
+                    <h1 className="font-display text-3xl font-bold text-gray-900">My Fleet</h1>
                     <p className="text-gray-500">Manage your buses and schedules</p>
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm"
                 >
                     {showForm ? 'Cancel' : '+ Add Bus'}
                 </button>
@@ -249,7 +249,7 @@ export default function OperatorDashboard() {
                     {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
                     <button
                         type="submit"
-                        className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors"
+                        className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm shadow-accent-600/20"
                     >
                         Create Bus
                     </button>
@@ -271,124 +271,132 @@ export default function OperatorDashboard() {
 
             <div className="grid md:grid-cols-2 gap-4">
                 {buses.map((bus) => (
-                    <div key={bus.id} className="bg-white rounded-xl border border-gray-200 p-5">
+                    <div key={bus.id} className="group bg-white rounded-xl border border-gray-200 p-5 hover:border-brand-200 hover:shadow-sm transition-all">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-gray-900">{bus.model}</h3>
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-semibold text-gray-900">{bus.model}</h3>
+                            </div>
                             <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded">
                                 {bus.registrationNo}
                             </span>
                         </div>
-                        <p className="text-sm text-gray-500">{bus.totalSeats} seats</p>
+                        <p className="text-sm text-gray-500 pl-12">{bus.totalSeats} seats</p>
                     </div>
                 ))}
             </div>
-            <div className="flex items-center justify-between mb-6 mt-16">
-    <div>
-        <h2 className="text-2xl font-bold text-gray-900">Schedules</h2>
-        <p className="text-gray-500 text-sm">Assign your buses to routes and times</p>
-    </div>
-    <button
-        onClick={() => setShowScheduleForm(!showScheduleForm)}
-        disabled={buses.length === 0}
-        className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors"
-    >
-        {showScheduleForm ? 'Cancel' : '+ Add Schedule'}
-    </button>
-</div>
-
-{buses.length === 0 && (
-    <p className="text-sm text-gray-400 mb-6">Add a bus first before creating schedules.</p>
-)}
-
-{showScheduleForm && (
-    <form onSubmit={createSchedule} className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Bus</label>
-                <select
-                    value={selectedBusId}
-                    onChange={(e) => setSelectedBusId(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                >
-                    <option value="">Select a bus</option>
-                    {buses.map((b) => (
-                        <option key={b.id} value={b.id}>{b.model} — {b.registrationNo}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-                <div className="grid grid-cols-2 gap-2">
-                    <TownAutocomplete
-                            value={routeFrom}
-                            onChange={setRouteFrom}
-                            placeholder="Colombo"
-                            label="From"
-                    />
-                    <TownAutocomplete
-                        value={routeTo}
-                        onChange={setRouteTo}
-                        placeholder="Kandy"
-                        label="To"
-                    />
+            <div className="flex items-center justify-between mb-6 mt-16 pt-8 border-t border-gray-200">
+                <div>
+                    <h2 className="font-display text-2xl font-bold text-gray-900">Schedules</h2>
+                    <p className="text-gray-500 text-sm">Assign your buses to routes and times</p>
                 </div>
-            
+                <button
+                    onClick={() => setShowScheduleForm(!showScheduleForm)}
+                    disabled={buses.length === 0}
+                    className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm disabled:shadow-none"
+                >
+                    {showScheduleForm ? 'Cancel' : '+ Add Schedule'}
+                </button>
             </div>
-            <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Departure</label>
-                <input
-                    type="datetime-local"
-                    value={departureTime}
-                    onChange={(e) => setDepartureTime(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-            </div>
-            <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Arrival</label>
-                <input
-                    type="datetime-local"
-                    value={arrivalTime}
-                    onChange={(e) => setArrivalTime(e.target.value)}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-            </div>
-            <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Fare (Rs.)</label>
-                <input
-                    type="number"
-                    value={fare}
-                    onChange={(e) => setFare(e.target.value)}
-                    min={0}
-                    required
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-            </div>
-        </div>
-        {scheduleError && <p className="text-red-600 text-sm mb-4">{scheduleError}</p>}
-        <button
-            type="submit"
-            className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors"
-        >
-            Create Schedule
-        </button>
-    </form>
-)}
 
-<div className="grid gap-3">
-    {schedules.map((s) => (
-        <div key={s.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
-            <div>
-                <p className="font-semibold text-gray-900">{s.routeId}</p>
-                <p className="text-sm text-gray-500">
-                    {new Date(s.departureTime).toLocaleString()} → {new Date(s.arrivalTime).toLocaleString()}
-                </p>
+            {buses.length === 0 && (
+                <p className="text-sm text-gray-400 mb-6">Add a bus first before creating schedules.</p>
+            )}
+
+            {showScheduleForm && (
+                <form onSubmit={createSchedule} className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Bus</label>
+                            <select
+                                value={selectedBusId}
+                                onChange={(e) => setSelectedBusId(e.target.value)}
+                                required
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            >
+                                <option value="">Select a bus</option>
+                                {buses.map((b) => (
+                                    <option key={b.id} value={b.id}>{b.model} — {b.registrationNo}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <TownAutocomplete
+                                value={routeFrom}
+                                onChange={setRouteFrom}
+                                placeholder="Colombo"
+                                label="From"
+                            />
+                            <TownAutocomplete
+                                value={routeTo}
+                                onChange={setRouteTo}
+                                placeholder="Kandy"
+                                label="To"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Departure</label>
+                            <input
+                                type="datetime-local"
+                                value={departureTime}
+                                onChange={(e) => setDepartureTime(e.target.value)}
+                                required
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Arrival</label>
+                            <input
+                                type="datetime-local"
+                                value={arrivalTime}
+                                onChange={(e) => setArrivalTime(e.target.value)}
+                                required
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Fare (Rs.)</label>
+                            <input
+                                type="number"
+                                value={fare}
+                                onChange={(e) => setFare(e.target.value)}
+                                min={0}
+                                required
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                        </div>
+                    </div>
+                    {scheduleError && <p className="text-red-600 text-sm mb-4">{scheduleError}</p>}
+                    <button
+                        type="submit"
+                        className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm shadow-accent-600/20"
+                    >
+                        Create Schedule
+                    </button>
+                </form>
+            )}
+
+            {!loading && schedules.length === 0 && buses.length > 0 && (
+                <p className="text-sm text-gray-400 mb-6">No schedules yet. Add one above.</p>
+            )}
+
+            <div className="grid gap-3">
+                {schedules.map((s) => (
+                    <div key={s.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between hover:border-brand-200 transition-colors">
+                        <div>
+                            <p className="font-semibold text-gray-900">{s.routeId}</p>
+                            <p className="text-sm text-gray-500">
+                                {new Date(s.departureTime).toLocaleString()} → {new Date(s.arrivalTime).toLocaleString()}
+                            </p>
+                        </div>
+                        <span className="font-bold text-brand-700">Rs. {s.fare}</span>
+                    </div>
+                ))}
             </div>
-            <span className="font-bold text-brand-700">Rs. {s.fare}</span>
-        </div>
-    ))}
-</div>
         </div>
     );
 }

@@ -1,16 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eff9fa;
-  --color-brand-100: #d3eef1;
-  --color-brand-500: #0f7a8c;
-  --color-brand-600: #0c6270;
-  --color-brand-700: #0a4d59;
-  --color-brand-900: #063138;
+  --color-brand-50: #fbeef1;
+  --color-brand-100: #f3d6dc;
+  --color-brand-200: #e3aab6;
+  --color-brand-300: #cd7c8c;
+  --color-brand-400: #a8465e;
+  --color-brand-500: #872538;
+  --color-brand-600: #6c1c2c;
+  --color-brand-700: #551523;
+  --color-brand-800: #400f1a;
+  --color-brand-900: #2c0a12;
 
-  --color-accent-400: #f5a623;
-  --color-accent-500: #e8940f;
-  --color-accent-600: #c47c0c;
+  --color-accent-50: #fdf7e8;
+  --color-accent-100: #faebc0;
+  --color-accent-400: #f0b429;
+  --color-accent-500: #dc9e1c;
+  --color-accent-600: #b37f12;
+  --color-accent-700: #8f640d;
+
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Poppins', 'Inter', system-ui, sans-serif;
 }
 
 @media print {
@@ -21,8 +31,14 @@
 
 body {
   margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  background-color: #f8f7f5;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 #root {
@@ -55,4 +71,18 @@ body {
 
 .fade-in {
   animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.scale-in {
+  animation: scaleIn 0.18s ease-out;
+}
+
+::selection {
+  background-color: var(--color-accent-400);
+  color: var(--color-brand-900);
 }

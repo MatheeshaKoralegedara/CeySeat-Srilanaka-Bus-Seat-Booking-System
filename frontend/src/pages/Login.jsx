@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/CEYSEAT.png';
 
 export default function Login() {
     const { t } = useTranslation();
@@ -28,8 +29,9 @@ export default function Login() {
 
     return (
         <div className="max-w-sm mx-auto">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">{t('auth.welcomeBack')}</h1>
+            <div className="bg-white rounded-2xl shadow-lg shadow-brand-900/5 border border-gray-100 p-8">
+                <img src={logo} alt="CeySeat" className="h-24 w-auto mx-auto mb-5" />
+                <h1 className="font-display text-2xl font-bold text-gray-900 mb-1 text-center">{t('auth.welcomeBack')}</h1>
                 <p className="text-gray-500 text-sm mb-6 text-center">{t('auth.loginSubtitle')}</p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -40,7 +42,7 @@ export default function Login() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow"
                         />
                     </div>
 
@@ -51,7 +53,7 @@ export default function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow"
                         />
                     </div>
 
@@ -64,7 +66,7 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-semibold py-3 rounded-lg transition-colors"
+                        className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-semibold py-3 rounded-lg transition-colors shadow-sm shadow-brand-900/10"
                     >
                         {loading ? t('auth.loggingIn') : t('auth.logIn')}
                     </button>

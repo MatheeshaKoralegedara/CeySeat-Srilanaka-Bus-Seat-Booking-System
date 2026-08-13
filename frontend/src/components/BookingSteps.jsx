@@ -16,7 +16,7 @@ export default function BookingSteps({ current }) {
                                         ? 'bg-brand-600 text-white'
                                         : active
                                         ? 'bg-accent-500 text-brand-900'
-                                        : 'bg-gray-200 text-gray-400'
+                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                                 }`}
                             >
                                 {done ? (
@@ -27,12 +27,12 @@ export default function BookingSteps({ current }) {
                                     stepNum
                                 )}
                             </div>
-                            <span className={`text-[11px] font-medium hidden sm:block ${active ? 'text-brand-700' : 'text-gray-400'}`}>
+                            <span className={`text-[11px] font-medium hidden sm:block ${active ? 'text-brand-700 dark:text-brand-300' : 'text-gray-400 dark:text-gray-500'}`}>
                                 {label}
                             </span>
                         </div>
                         {stepNum < steps.length && (
-                            <div className={`flex-1 h-0.5 mx-2 mb-4 sm:mb-4 rounded ${done ? 'bg-brand-600' : 'bg-gray-200'}`}></div>
+                            <div className={`flex-1 h-0.5 mx-2 mb-4 sm:mb-4 rounded ${done ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700'}`}></div>
                         )}
                     </div>
                 );

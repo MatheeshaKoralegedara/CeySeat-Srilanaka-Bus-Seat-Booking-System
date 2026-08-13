@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #fbeef1;
   --color-brand-100: #f3d6dc;
@@ -34,6 +36,11 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   background-color: #f8f7f5;
+  transition: background-color 0.2s ease;
+}
+
+.dark body {
+  background-color: #14181c;
 }
 
 h1, h2, h3, .font-display {

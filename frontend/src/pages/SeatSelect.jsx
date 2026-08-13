@@ -99,9 +99,9 @@ export default function SeatSelect() {
     }
 
     const seatStyles = {
-        available: 'bg-white border-2 border-gray-300 text-gray-700 hover:border-brand-500 hover:bg-brand-50 hover:-translate-y-0.5 cursor-pointer shadow-sm',
+        available: 'bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/40 hover:-translate-y-0.5 cursor-pointer shadow-sm',
         selected: 'bg-brand-600 border-2 border-brand-600 text-white cursor-pointer shadow-md shadow-brand-600/30 scale-105',
-        taken: 'bg-gray-100 border-2 border-gray-100 text-gray-300 cursor-not-allowed',
+        taken: 'bg-gray-100 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed',
     };
 
     const totalSeats = seatLayout.length;
@@ -114,7 +114,7 @@ export default function SeatSelect() {
             <div className="max-w-md mx-auto">
                 <SkeletonBlock className="h-8 w-48 mb-2" />
                 <SkeletonBlock className="h-4 w-32 mb-8" />
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                     <div className="flex flex-col gap-2">
                         {[...Array(6)].map((_, i) => (
                             <div key={i} className="flex justify-center gap-3">
@@ -133,8 +133,8 @@ export default function SeatSelect() {
 
     if (seatLayout.length === 0) {
         return (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-200 max-w-md mx-auto">
-                <p className="text-gray-500">Seat layout unavailable for this bus.</p>
+            <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
+                <p className="text-gray-500 dark:text-gray-400">Seat layout unavailable for this bus.</p>
             </div>
         );
     }
@@ -146,21 +146,21 @@ export default function SeatSelect() {
             <BookingSteps current={1} />
 
             <div className="flex items-center justify-between mb-1">
-                <h1 className="font-display text-2xl font-bold text-gray-900">{t('seats.title')}</h1>
+                <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-gray-100">{t('seats.title')}</h1>
                 {seatsLeft <= 8 && (
-                    <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2.5 py-1 rounded-full">
                         Only {seatsLeft} seats left
                     </span>
                 )}
             </div>
-            <p className="text-gray-500 text-sm mb-8">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
                 {busInfo?.model} · {busInfo?.totalSeats} seats
                 {selectedSeats.length < MAX_SEATS ? '' : ` · max ${MAX_SEATS} seats per booking`}
             </p>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                 <div className="flex justify-end mb-4 pr-1">
-                    <div className="flex items-center gap-1.5 text-gray-400 text-xs font-medium">
+                    <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-xs font-medium">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="8" />
                             <path strokeLinecap="round" d="M12 4v4m0 8v4m8-8h-4M8 12H4" />
@@ -175,7 +175,7 @@ export default function SeatSelect() {
 
                         if (isRearBench) {
                             return (
-                                <div key={i} className="flex justify-center gap-2 mt-3 pt-3 border-t border-dashed border-gray-200">
+                                <div key={i} className="flex justify-center gap-2 mt-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700">
                                     {rowSeats.map((seat) => {
                                         const state = seatState(seat.seatNo);
                                         return (
@@ -187,7 +187,7 @@ export default function SeatSelect() {
                                             >
                                                 {seat.seatNo}
                                                 {state === 'taken' && seatGenders[seat.seatNo] && (
-                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
                                                         seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
                                                     }`} />
                                                 )}
@@ -215,7 +215,7 @@ export default function SeatSelect() {
                                             >
                                                 {seat.seatNo}
                                                 {state === 'taken' && seatGenders[seat.seatNo] && (
-                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
                                                         seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
                                                     }`} />
                                                 )}
@@ -238,7 +238,7 @@ export default function SeatSelect() {
                                             >
                                                 {seat.seatNo}
                                                 {state === 'taken' && seatGenders[seat.seatNo] && (
-                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
                                                         seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
                                                     }`} />
                                                 )}
@@ -251,9 +251,9 @@ export default function SeatSelect() {
                     })}
                 </div>
 
-                <div className="flex items-center justify-center gap-6 text-xs text-gray-500 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-center gap-6 text-xs text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded border-2 border-gray-300 bg-white"></div>
+                        <div className="w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900"></div>
                         {t('seats.available')}
                     </div>
                     <div className="flex items-center gap-2">
@@ -261,7 +261,7 @@ export default function SeatSelect() {
                         {t('seats.selected')}
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-gray-200"></div>
+                        <div className="w-4 h-4 rounded bg-gray-200 dark:bg-gray-700"></div>
                         {t('seats.taken')}
                     </div>
                     <div className="flex items-center gap-2">
@@ -276,29 +276,29 @@ export default function SeatSelect() {
             </div>
 
             {error && (
-                <p className="text-red-600 text-sm mt-4 text-center bg-red-50 border border-red-100 rounded-lg px-4 py-2">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-4 text-center bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg px-4 py-2">{error}</p>
             )}
 
             {/* Sticky selection summary bar */}
             <div className="fixed bottom-0 left-0 right-0 z-20">
                 <div className="max-w-md mx-auto px-4 pb-4">
-                    <div className="bg-white rounded-2xl shadow-2xl shadow-brand-900/20 border border-gray-200 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-brand-900/20 border border-gray-200 dark:border-gray-700 p-4">
                         {selectedSeats.length > 0 ? (
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex flex-wrap gap-1.5">
                                     {selectedSeats.map((s) => (
-                                        <span key={s} className="text-xs font-bold bg-brand-50 text-brand-700 px-2 py-1 rounded-md">
+                                        <span key={s} className="text-xs font-bold bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-md">
                                             {s}
                                         </span>
                                     ))}
                                 </div>
                                 <div className="text-right flex-shrink-0 pl-3">
-                                    <p className="text-xs text-gray-400">{selectedSeats.length} seat{selectedSeats.length > 1 ? 's' : ''}</p>
-                                    <p className="font-display text-lg font-bold text-brand-700">Rs. {total}</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500">{selectedSeats.length} seat{selectedSeats.length > 1 ? 's' : ''}</p>
+                                    <p className="font-display text-lg font-bold text-brand-700 dark:text-brand-300">Rs. {total}</p>
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-400 text-center mb-3">{t('seats.selectToContinue')}</p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500 text-center mb-3">{t('seats.selectToContinue')}</p>
                         )}
                         <button
                             disabled={selectedSeats.length === 0 || reserving}

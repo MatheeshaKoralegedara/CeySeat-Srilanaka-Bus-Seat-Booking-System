@@ -63,11 +63,11 @@ export default function Schedules() {
     return (
         <div>
             <div className="mb-8">
-                <h1 className="font-display text-3xl font-bold text-gray-900 mb-2">{t('schedules.title')}</h1>
-                <p className="text-gray-500">{t('schedules.subtitle')}</p>
+                <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('schedules.title')}</h1>
+                <p className="text-gray-500 dark:text-gray-400">{t('schedules.subtitle')}</p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
                     <div>
                         <TownAutocomplete value={from} onChange={setFrom} placeholder="Colombo" label={t('home.from')} />
@@ -76,12 +76,12 @@ export default function Schedules() {
                         <TownAutocomplete value={to} onChange={setTo} placeholder="Kandy" label={t('home.to')} />
                     </div>
                     <div>
-                        <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">{t('schedules.date')}</label>
+                        <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">{t('schedules.date')}</label>
                         <input
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                     </div>
                     <div>
@@ -104,21 +104,21 @@ export default function Schedules() {
             )}
 
             {!loading && schedules.length === 0 && (
-                <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-                    <p className="text-gray-500 text-lg">{t('schedules.noResults')}</p>
-                    <p className="text-gray-400 text-sm mt-1">{t('schedules.tryDifferent')}</p>
+                <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">{t('schedules.noResults')}</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">{t('schedules.tryDifferent')}</p>
                 </div>
             )}
 
             {!loading && schedules.length > 0 && (
                 <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm text-gray-500">{schedules.length} bus{schedules.length > 1 ? 'es' : ''} found</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{schedules.length} bus{schedules.length > 1 ? 'es' : ''} found</p>
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 uppercase font-semibold hidden sm:inline">Sort by</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 uppercase font-semibold hidden sm:inline">Sort by</span>
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+                            className="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
                         >
                             <option value="departure">Earliest Departure</option>
                             <option value="price">Lowest Price</option>
@@ -132,27 +132,27 @@ export default function Schedules() {
                 {sortedSchedules.map((s) => (
                     <div
                         key={s.id}
-                        className="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-lg hover:shadow-brand-900/5 hover:border-brand-200 transition-all"
+                        className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between hover:shadow-lg hover:shadow-brand-900/5 hover:border-brand-200 dark:hover:border-brand-500 transition-all"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="hidden sm:flex w-11 h-11 rounded-lg bg-brand-50 text-brand-600 items-center justify-center flex-shrink-0">
+                            <div className="hidden sm:flex w-11 h-11 rounded-lg bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 items-center justify-center flex-shrink-0">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="font-display text-xl font-semibold text-gray-900 mb-1">
+                                <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
                                     {s.routeId}
                                 </h2>
-                                <p className="text-gray-500 text-sm">
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">
                                     {formatDate(s.departureTime)} → {formatDate(s.arrivalTime)}
-                                    <span className="text-gray-400"> · {formatDuration(durationMs(s))}</span>
+                                    <span className="text-gray-400 dark:text-gray-500"> · {formatDuration(durationMs(s))}</span>
                                 </p>
                             </div>
                         </div>
 
                         <div className="text-right flex flex-col items-end gap-2">
-                            <span className="text-2xl font-bold text-brand-700">
+                            <span className="text-2xl font-bold text-brand-700 dark:text-brand-300">
                                 Rs. {s.fare}
                             </span>
                             <button

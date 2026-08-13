@@ -96,13 +96,13 @@ export default function Payment() {
     if (loadError) {
         return (
             <div className="max-w-md mx-auto text-center py-16">
-                <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.008M12 3l9 16.5H3L12 3z" />
                     </svg>
                 </div>
-                <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">Can't Load This Payment</h1>
-                <p className="text-gray-500 mb-8">{loadError}</p>
+                <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Can't Load This Payment</h1>
+                <p className="text-gray-500 dark:text-gray-400 mb-8">{loadError}</p>
                 <Link
                     to="/bookings"
                     className="inline-block bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-sm"
@@ -116,7 +116,7 @@ export default function Payment() {
     if (!hashData) {
         return (
             <div className="max-w-md mx-auto">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
                     <SkeletonBlock className="h-4 w-24 mx-auto mb-2" />
                     <SkeletonBlock className="h-10 w-32 mx-auto mb-8" />
                     <SkeletonBlock className="h-14 w-full rounded-xl" />
@@ -134,17 +134,17 @@ export default function Payment() {
         return (
             <div className="max-w-md mx-auto">
                 <div className="text-center mb-6">
-                    <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h1 className="font-display text-2xl font-bold text-gray-900 mb-1">{t('payment.confirmed')}</h1>
-                    <p className="text-gray-500">{t('payment.ticketReady')}</p>
+                    <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{t('payment.confirmed')}</h1>
+                    <p className="text-gray-500 dark:text-gray-400">{t('payment.ticketReady')}</p>
                 </div>
 
                 {/* Ticket card */}
-                <div className="bg-white rounded-2xl shadow-xl shadow-brand-900/10 border border-gray-100 overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-brand-900/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div className="bg-brand-700 text-white px-6 py-4 flex items-center justify-between">
                         <img src="/CEYSEAT.png" alt="CeySeat" className="h-8 w-auto bg-white rounded px-1.5 py-0.5" />
                         <span className="text-xs bg-white/15 px-3 py-1 rounded-full font-mono tracking-wide">
@@ -153,30 +153,30 @@ export default function Payment() {
                     </div>
 
                     <div className="relative p-6 flex flex-col items-center">
-                        <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-[#f8f7f5]"></div>
-                        <div className="absolute right-0 top-0 translate-x-1/2 w-6 h-6 rounded-full bg-[#f8f7f5]"></div>
+                        <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-[#f8f7f5] dark:bg-[#14181c]"></div>
+                        <div className="absolute right-0 top-0 translate-x-1/2 w-6 h-6 rounded-full bg-[#f8f7f5] dark:bg-[#14181c]"></div>
 
                         <div className="bg-white p-3 rounded-xl border border-gray-100 mb-4 shadow-sm">
                             <QRCodeSVG value={qrValue} size={160} fgColor="#551523" />
                         </div>
-                        <p className="text-xs text-gray-400 mb-6">{t('payment.showQr')}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">{t('payment.showQr')}</p>
 
-                        <div className="w-full border-t-2 border-dashed border-gray-200 pt-4 space-y-3 text-sm">
+                        <div className="w-full border-t-2 border-dashed border-gray-200 dark:border-gray-700 pt-4 space-y-3 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-gray-500">{seatLabel}</span>
-                                <span className="font-semibold text-gray-900">{hashData.seatNumbers?.join(', ')}</span>
+                                <span className="text-gray-500 dark:text-gray-400">{seatLabel}</span>
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">{hashData.seatNumbers?.join(', ')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-500">{t('payment.amountPaid')}</span>
-                                <span className="font-semibold text-gray-900">Rs. {hashData.amount}</span>
+                                <span className="text-gray-500 dark:text-gray-400">{t('payment.amountPaid')}</span>
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">Rs. {hashData.amount}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-500">{t('payment.paymentId')}</span>
-                                <span className="font-mono text-xs text-gray-700">{hashData.orderId.slice(-12)}</span>
+                                <span className="text-gray-500 dark:text-gray-400">{t('payment.paymentId')}</span>
+                                <span className="font-mono text-xs text-gray-700 dark:text-gray-300">{hashData.orderId.slice(-12)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-500">{t('payment.status')}</span>
-                                <span className="inline-flex items-center gap-1.5 font-semibold text-green-600">
+                                <span className="text-gray-500 dark:text-gray-400">{t('payment.status')}</span>
+                                <span className="inline-flex items-center gap-1.5 font-semibold text-green-600 dark:text-green-400">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                                     {t('payment.confirmedStatus')}
                                 </span>
@@ -188,7 +188,7 @@ export default function Payment() {
                 <div className="flex gap-3 mt-6">
                     <button
                         onClick={() => window.print()}
-                        className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-colors"
+                        className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold py-3 rounded-xl transition-colors"
                     >
                         {t('payment.download')}
                     </button>
@@ -206,15 +206,15 @@ export default function Payment() {
     if (status === 'dismissed' || status === 'error') {
         return (
             <div className="max-w-md mx-auto text-center py-16">
-                <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
-                <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">
+                <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     {status === 'dismissed' ? 'Payment Cancelled' : 'Something Went Wrong'}
                 </h1>
-                <p className="text-gray-500 mb-8">
+                <p className="text-gray-500 dark:text-gray-400 mb-8">
                     {status === 'dismissed'
                         ? 'You closed the payment window before completing checkout.'
                         : 'Your payment could not be processed. Please try again.'}
@@ -233,8 +233,8 @@ export default function Payment() {
         <div className="max-w-md mx-auto">
             <BookingSteps current={2} />
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-                <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-5">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+                <div className="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 flex items-center justify-center mx-auto mb-5">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -243,18 +243,18 @@ export default function Payment() {
                 {hashData.seatNumbers?.length > 0 && (
                     <div className="flex flex-wrap justify-center gap-1.5 mb-5">
                         {hashData.seatNumbers.map((s) => (
-                            <span key={s} className="text-xs font-bold bg-brand-50 text-brand-700 px-2.5 py-1 rounded-md">
+                            <span key={s} className="text-xs font-bold bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 px-2.5 py-1 rounded-md">
                                 {seatLabel === 'Seats' ? `Seat ${s}` : s}
                             </span>
                         ))}
                     </div>
                 )}
 
-                <p className="text-gray-500 text-sm mb-1">{t('payment.totalAmount')}</p>
-                <p className="font-display text-4xl font-bold text-brand-700 mb-3">Rs. {hashData.amount}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">{t('payment.totalAmount')}</p>
+                <p className="font-display text-4xl font-bold text-brand-700 dark:text-brand-300 mb-3">Rs. {hashData.amount}</p>
 
                 {countdown && !countdown.expired && (
-                    <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-full mb-5">
+                    <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-3 py-1.5 rounded-full mb-5">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="9" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
@@ -263,7 +263,7 @@ export default function Payment() {
                     </p>
                 )}
                 {countdown && countdown.expired && (
-                    <p className="text-xs font-semibold text-red-600 bg-red-50 px-3 py-1.5 rounded-full mb-5 inline-block">
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-3 py-1.5 rounded-full mb-5 inline-block">
                         Your seat hold has expired
                     </p>
                 )}
@@ -272,12 +272,12 @@ export default function Payment() {
                 <button
                     onClick={pay}
                     disabled={status === 'processing' || countdown?.expired}
-                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 text-brand-900 font-semibold py-4 rounded-xl transition-colors shadow-md shadow-accent-600/25 disabled:shadow-none"
+                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-brand-900 font-semibold py-4 rounded-xl transition-colors shadow-md shadow-accent-600/25 disabled:shadow-none"
                 >
                     {status === 'processing' ? t('payment.processing') : t('payment.payWith')}
                 </button>
 
-                <p className="text-xs text-gray-400 mt-4 flex items-center justify-center gap-1.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 flex items-center justify-center gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>

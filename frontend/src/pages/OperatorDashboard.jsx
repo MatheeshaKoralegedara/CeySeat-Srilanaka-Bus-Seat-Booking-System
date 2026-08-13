@@ -161,8 +161,8 @@ export default function OperatorDashboard() {
         <div>
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="font-display text-3xl font-bold text-gray-900">My Fleet</h1>
-                    <p className="text-gray-500">Manage your buses and schedules</p>
+                    <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100">My Fleet</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Manage your buses and schedules</p>
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
@@ -173,11 +173,11 @@ export default function OperatorDashboard() {
             </div>
 
             {showForm && (
-                <form onSubmit={createBus} className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-                    <h2 className="font-semibold text-gray-900 mb-4">New Bus</h2>
+                <form onSubmit={createBus} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">New Bus</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">
                                 Registration No.
                             </label>
                             <input
@@ -185,26 +185,26 @@ export default function OperatorDashboard() {
                                 onChange={(e) => setRegistrationNo(e.target.value)}
                                 placeholder="NB-1234"
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Model</label>
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Model</label>
                             <input
                                 value={model}
                                 onChange={(e) => setModel(e.target.value)}
                                 placeholder="Volvo B11R"
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
 
                         <div>
-                           <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Layout</label>
+                           <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Layout</label>
                               <select
                                  value={layoutType}
                                  onChange={(e) => setLayoutType(e.target.value)}
-                                 className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                 className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
     >
                                  <option value="2+2">2+2 (AC / Luxury)</option>
                                  <option value="3+2">3+2 (Normal / Rural)</option>
@@ -219,7 +219,7 @@ export default function OperatorDashboard() {
                                 onChange={(e) => setHasRearBench(e.target.checked)}
                                 className="w-4 h-4"
                             />
-                            <label htmlFor="rearBench" className="text-sm text-gray-700">
+                            <label htmlFor="rearBench" className="text-sm text-gray-700 dark:text-gray-300">
                                 Include rear bench seat (continuous row across the back)
                             </label>
                             {hasRearBench && (
@@ -229,13 +229,13 @@ export default function OperatorDashboard() {
                                     onChange={(e) => setRearBenchSize(Number(e.target.value))}
                                     min={3}
                                     max={6}
-                                    className="w-20 px-2 py-1 rounded-lg border border-gray-300 text-sm"
+                                    className="w-20 px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm"
                                 />
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">
                                 Total Seats
                             </label>
                             <input
@@ -245,11 +245,11 @@ export default function OperatorDashboard() {
                                 min={4}
                                 max={60}
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
                     </div>
-                    {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+                    {error && <p className="text-red-600 dark:text-red-400 text-sm mb-4">{error}</p>}
                     <button
                         type="submit"
                         className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm shadow-accent-600/20"
@@ -267,59 +267,59 @@ export default function OperatorDashboard() {
             )}
 
             {!loading && buses.length === 0 && (
-                <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-                    <p className="text-gray-500">No buses yet. Add your first one above.</p>
+                <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <p className="text-gray-500 dark:text-gray-400">No buses yet. Add your first one above.</p>
                 </div>
             )}
 
             <div className="grid md:grid-cols-2 gap-4">
                 {buses.map((bus) => (
-                    <div key={bus.id} className="group bg-white rounded-xl border border-gray-200 p-5 hover:border-brand-200 hover:shadow-sm transition-all">
+                    <div key={bus.id} className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-brand-200 dark:hover:border-brand-500 hover:shadow-sm transition-all">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
+                                <div className="w-9 h-9 rounded-lg bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 flex items-center justify-center flex-shrink-0">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
-                                <h3 className="font-semibold text-gray-900">{bus.model}</h3>
+                                <h3 className="font-semibold text-gray-900 dark:text-gray-100">{bus.model}</h3>
                             </div>
-                            <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            <span className="text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
                                 {bus.registrationNo}
                             </span>
                         </div>
-                        <p className="text-sm text-gray-500 pl-12">{bus.totalSeats} seats</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 pl-12">{bus.totalSeats} seats</p>
                     </div>
                 ))}
             </div>
-            <div className="flex items-center justify-between mb-6 mt-16 pt-8 border-t border-gray-200">
+            <div className="flex items-center justify-between mb-6 mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
                 <div>
-                    <h2 className="font-display text-2xl font-bold text-gray-900">Schedules</h2>
-                    <p className="text-gray-500 text-sm">Assign your buses to routes and times</p>
+                    <h2 className="font-display text-2xl font-bold text-gray-900 dark:text-gray-100">Schedules</h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Assign your buses to routes and times</p>
                 </div>
                 <button
                     onClick={() => setShowScheduleForm(!showScheduleForm)}
                     disabled={buses.length === 0}
-                    className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm disabled:shadow-none"
+                    className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm disabled:shadow-none"
                 >
                     {showScheduleForm ? 'Cancel' : '+ Add Schedule'}
                 </button>
             </div>
 
             {buses.length === 0 && (
-                <p className="text-sm text-gray-400 mb-6">Add a bus first before creating schedules.</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">Add a bus first before creating schedules.</p>
             )}
 
             {showScheduleForm && (
-                <form onSubmit={createSchedule} className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+                <form onSubmit={createSchedule} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Bus</label>
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Bus</label>
                             <select
                                 value={selectedBusId}
                                 onChange={(e) => setSelectedBusId(e.target.value)}
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="">Select a bus</option>
                                 {buses.map((b) => (
@@ -342,38 +342,38 @@ export default function OperatorDashboard() {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Departure</label>
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Departure</label>
                             <input
                                 type="datetime-local"
                                 value={departureTime}
                                 onChange={(e) => setDepartureTime(e.target.value)}
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Arrival</label>
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Arrival</label>
                             <input
                                 type="datetime-local"
                                 value={arrivalTime}
                                 onChange={(e) => setArrivalTime(e.target.value)}
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Fare (Rs.)</label>
+                            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">Fare (Rs.)</label>
                             <input
                                 type="number"
                                 value={fare}
                                 onChange={(e) => setFare(e.target.value)}
                                 min={0}
                                 required
-                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
                     </div>
-                    {scheduleError && <p className="text-red-600 text-sm mb-4">{scheduleError}</p>}
+                    {scheduleError && <p className="text-red-600 dark:text-red-400 text-sm mb-4">{scheduleError}</p>}
                     <button
                         type="submit"
                         className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm shadow-accent-600/20"
@@ -384,19 +384,19 @@ export default function OperatorDashboard() {
             )}
 
             {!loading && schedules.length === 0 && buses.length > 0 && (
-                <p className="text-sm text-gray-400 mb-6">No schedules yet. Add one above.</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">No schedules yet. Add one above.</p>
             )}
 
             <div className="grid gap-3">
                 {schedules.map((s) => (
-                    <div key={s.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between hover:border-brand-200 transition-colors">
+                    <div key={s.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
                         <div>
-                            <p className="font-semibold text-gray-900">{s.routeId}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{s.routeId}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {new Date(s.departureTime).toLocaleString()} → {new Date(s.arrivalTime).toLocaleString()}
                             </p>
                         </div>
-                        <span className="font-bold text-brand-700">Rs. {s.fare}</span>
+                        <span className="font-bold text-brand-700 dark:text-brand-300">Rs. {s.fare}</span>
                     </div>
                 ))}
             </div>

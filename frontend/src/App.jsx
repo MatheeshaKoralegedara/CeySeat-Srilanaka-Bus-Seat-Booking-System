@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -14,8 +15,9 @@ import AdminPanel from './pages/AdminPanel';
 
 export default function App() {
     return (
+        <ThemeProvider>
         <AuthProvider>
-          
+
             <BrowserRouter>
             <Layout>
                 <Routes>
@@ -38,5 +40,6 @@ export default function App() {
             </Layout>
             </BrowserRouter>
         </AuthProvider>
+        </ThemeProvider>
     );
 }

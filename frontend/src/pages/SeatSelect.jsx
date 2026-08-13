@@ -9,6 +9,12 @@ import BookingSteps from '../components/BookingSteps';
 
 const MAX_SEATS = 6;
 
+const busTypeLabels = {
+    NORMAL: 'Normal',
+    SEMI_LUXURY: 'Semi Luxury',
+    LUXURY: 'Luxury',
+};
+
 function groupByRow(seatLayout) {
     const rows = {};
     seatLayout.forEach((seat) => {
@@ -153,10 +159,24 @@ export default function SeatSelect() {
                     </span>
                 )}
             </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
+            {busInfo?.travelName && (
+                <p className="text-gray-900 dark:text-gray-100 font-semibold text-sm">{busInfo.travelName}</p>
+            )}
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">
                 {busInfo?.model} · {busInfo?.totalSeats} seats
+                {busInfo?.busType && ` · ${busTypeLabels[busInfo.busType] || busInfo.busType}`}
                 {selectedSeats.length < MAX_SEATS ? '' : ` · max ${MAX_SEATS} seats per booking`}
             </p>
+            <div className="mb-8">
+                {busInfo?.contactNumber && (
+                    <p className="text-gray-400 dark:text-gray-500 text-xs flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        {busInfo.contactNumber}
+                    </p>
+                )}
+            </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                 <div className="flex justify-end mb-4 pr-1">

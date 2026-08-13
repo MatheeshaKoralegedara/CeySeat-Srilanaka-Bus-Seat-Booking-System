@@ -5,6 +5,12 @@ import client from '../api/client';
 import TownAutocomplete from '../components/TownAutocomplete';
 import { SkeletonCard } from '../components/Skeleton';
 
+const busTypeLabels = {
+    NORMAL: 'Normal',
+    SEMI_LUXURY: 'Semi Luxury',
+    LUXURY: 'Luxury',
+};
+
 export default function Schedules() {
     const { t } = useTranslation();
     const [searchParams] = useSearchParams();
@@ -141,13 +147,30 @@ export default function Schedules() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                                    {s.routeId}
-                                </h2>
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-gray-100">
+                                        {s.routeId}
+                                    </h2>
+                                    {s.busType && (
+                                        <span className="text-xs font-semibold bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 px-2 py-0.5 rounded-full">
+                                            {busTypeLabels[s.busType] || s.busType}
+                                        </span>
+                                    )}
+                                </div>
+                                {(s.travelName || s.busModel) && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                                        {s.travelName}{s.travelName && s.busModel ? ' · ' : ''}{s.busModel}
+                                    </p>
+                                )}
                                 <p className="text-gray-500 dark:text-gray-400 text-sm">
                                     {formatDate(s.departureTime)} → {formatDate(s.arrivalTime)}
                                     <span className="text-gray-400 dark:text-gray-500"> · {formatDuration(durationMs(s))}</span>
                                 </p>
+                                {typeof s.availableSeats === 'number' && (
+                                    <p className={`text-xs font-semibold mt-1 ${s.availableSeats <= 8 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                                        {s.availableSeats > 0 ? `${s.availableSeats} seats left` : 'Fully booked'}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -157,9 +180,10 @@ export default function Schedules() {
                             </span>
                             <button
                                 onClick={() => navigate(`/seats/${s.id}`)}
-                                className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-5 py-2 rounded-lg transition-colors shadow-sm shadow-accent-600/20"
+                                disabled={s.availableSeats === 0}
+                                className="bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-brand-900 font-semibold px-5 py-2 rounded-lg transition-colors shadow-sm shadow-accent-600/20 disabled:shadow-none"
                             >
-                                {t('schedules.selectSeats')}
+                                {s.availableSeats === 0 ? 'Sold Out' : t('schedules.selectSeats')}
                             </button>
                         </div>
                     </div>

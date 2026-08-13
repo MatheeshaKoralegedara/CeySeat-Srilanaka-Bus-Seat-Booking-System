@@ -1,27 +1,89 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
 import { SkeletonBlock } from '../components/Skeleton';
+import DetailsModal from '../components/DetailsModal';
 
 const roleOptions = ['USER', 'OPERATOR', 'ADMIN'];
+
+const scheduleStatusStyles = {
+    PENDING: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400',
+    APPROVED: 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400',
+    REJECTED: 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400',
+};
+
+const busTypeLabels = {
+    NORMAL: 'Normal',
+    SEMI_LUXURY: 'Semi Luxury',
+    LUXURY: 'Luxury',
+};
 
 export default function AdminPanel() {
     const [tab, setTab] = useState('stats');
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [schedules, setSchedules] = useState([]);
+    const [buses, setBuses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [details, setDetails] = useState(null);
+
+    function loadSchedules() {
+        client.get('/admin/schedules').then((res) => setSchedules(res.data)).catch(() => setSchedules([]));
+    }
+
+    function loadBuses() {
+        client.get('/admin/buses').then((res) => setBuses(res.data)).catch(() => setBuses([]));
+    }
 
     useEffect(() => {
         Promise.all([
             client.get('/admin/stats'),
             client.get('/admin/users'),
             client.get('/admin/bookings'),
-        ]).then(([statsRes, usersRes, bookingsRes]) => {
+            client.get('/admin/schedules'),
+            client.get('/admin/buses'),
+        ]).then(([statsRes, usersRes, bookingsRes, schedulesRes, busesRes]) => {
             setStats(statsRes.data);
             setUsers(usersRes.data);
             setBookings(bookingsRes.data);
+            setSchedules(schedulesRes.data);
+            setBuses(busesRes.data);
         }).finally(() => setLoading(false));
     }, []);
+
+    function viewBusDetails(bus) {
+        setDetails({
+            title: bus.travelName || bus.model,
+            rows: [
+                { label: 'Travel Name', value: bus.travelName },
+                { label: 'Model', value: bus.model },
+                { label: 'Registration No.', value: bus.registrationNo },
+                { label: 'Bus Type', value: busTypeLabels[bus.busType] || bus.busType },
+                { label: 'Layout', value: bus.layoutType },
+                { label: 'Total Seats', value: bus.totalSeats },
+                { label: 'Contact Number', value: bus.contactNumber },
+                { label: 'Operator', value: bus.operatorName },
+                { label: 'Operator Email', value: bus.operatorEmail },
+            ],
+        });
+    }
+
+    function viewScheduleDetails(s) {
+        setDetails({
+            title: s.routeId,
+            rows: [
+                { label: 'Status', value: s.status },
+                { label: 'Travel Name', value: s.travelName },
+                { label: 'Bus', value: s.busModel },
+                { label: 'Bus Type', value: busTypeLabels[s.busType] || s.busType },
+                { label: 'Contact Number', value: s.contactNumber },
+                { label: 'Departure', value: new Date(s.departureTime).toLocaleString() },
+                { label: 'Arrival', value: new Date(s.arrivalTime).toLocaleString() },
+                { label: 'Fare', value: `Rs. ${s.fare}` },
+                { label: 'Seats Available', value: `${s.availableSeats} / ${s.totalSeats}` },
+            ],
+        });
+    }
 
     async function changeRole(userId, newRole) {
         try {
@@ -31,6 +93,37 @@ export default function AdminPanel() {
             alert('Could not update role');
         }
     }
+
+    async function setScheduleStatus(scheduleId, status) {
+        try {
+            await client.put(`/admin/schedules/${scheduleId}/status`, { status });
+            setSchedules((prev) => prev.map((s) => s.id === scheduleId ? { ...s, status } : s));
+        } catch {
+            alert('Could not update schedule status');
+        }
+    }
+
+    async function deleteSchedule(scheduleId) {
+        if (!window.confirm('Delete this schedule?')) return;
+        try {
+            await client.delete(`/schedules/${scheduleId}`);
+            loadSchedules();
+        } catch (err) {
+            alert(err.response?.data?.error || 'Could not delete schedule');
+        }
+    }
+
+    async function deleteBus(busId) {
+        if (!window.confirm('Delete this bus? Its schedules will no longer be manageable.')) return;
+        try {
+            await client.delete(`/buses/${busId}`);
+            loadBuses();
+        } catch (err) {
+            alert(err.response?.data?.error || 'Could not delete bus');
+        }
+    }
+
+    const pendingCount = schedules.filter((s) => s.status === 'PENDING').length;
 
     if (loading) {
         return (
@@ -60,17 +153,22 @@ export default function AdminPanel() {
             <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
 
             <div className="flex gap-2 mb-8 border-b border-gray-200 dark:border-gray-700">
-                {['stats', 'users', 'bookings'].map((t) => (
+                {['stats', 'users', 'bookings', 'buses', 'schedules'].map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`px-4 py-2.5 font-medium text-sm capitalize border-b-2 transition-colors ${
+                        className={`px-4 py-2.5 font-medium text-sm capitalize border-b-2 transition-colors flex items-center gap-1.5 ${
                             tab === t
                                 ? 'border-accent-500 text-brand-700 dark:text-brand-300'
                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                         }`}
                     >
                         {t}
+                        {t === 'schedules' && pendingCount > 0 && (
+                            <span className="text-[10px] font-bold bg-amber-500 text-white rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                                {pendingCount}
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>
@@ -147,6 +245,99 @@ export default function AdminPanel() {
                     ))}
                 </div>
             )}
+
+            {tab === 'buses' && (
+                <div className="grid gap-3">
+                    {buses.length === 0 && (
+                        <p className="text-sm text-gray-400 dark:text-gray-500">No buses yet.</p>
+                    )}
+                    {buses.map((bus) => (
+                        <div key={bus.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between gap-4 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100">{bus.travelName || bus.model}</p>
+                                    {bus.busType && (
+                                        <span className="text-xs font-semibold bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 px-2 py-0.5 rounded-full">
+                                            {busTypeLabels[bus.busType] || bus.busType}
+                                        </span>
+                                    )}
+                                    <span className="text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded">
+                                        {bus.registrationNo}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{bus.model} · {bus.totalSeats} seats</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">
+                                    Added by {bus.operatorName}{bus.operatorEmail ? ` (${bus.operatorEmail})` : ''}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                                <button onClick={() => viewBusDetails(bus)} className="text-xs font-semibold text-brand-600 dark:text-brand-300 hover:underline">
+                                    View Details
+                                </button>
+                                <button onClick={() => deleteBus(bus.id)} className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {tab === 'schedules' && (
+                <div className="grid gap-3">
+                    {schedules.length === 0 && (
+                        <p className="text-sm text-gray-400 dark:text-gray-500">No schedules yet.</p>
+                    )}
+                    {schedules.map((s) => (
+                        <div key={s.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between gap-4 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100">{s.routeId}</p>
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${scheduleStatusStyles[s.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                                        {s.status}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {s.travelName ? `${s.travelName} — ` : ''}{s.busModel}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {new Date(s.departureTime).toLocaleString()} → {new Date(s.arrivalTime).toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">
+                                    {s.availableSeats}/{s.totalSeats} seats available · Rs. {s.fare}
+                                </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <button onClick={() => viewScheduleDetails(s)} className="text-xs font-semibold text-brand-600 dark:text-brand-300 hover:underline">
+                                        View Details
+                                    </button>
+                                    {s.status !== 'APPROVED' && (
+                                        <button onClick={() => setScheduleStatus(s.id, 'APPROVED')} className="text-xs font-semibold text-green-600 dark:text-green-400 hover:underline">
+                                            Approve
+                                        </button>
+                                    )}
+                                    {s.status !== 'REJECTED' && (
+                                        <button onClick={() => setScheduleStatus(s.id, 'REJECTED')} className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline">
+                                            Reject
+                                        </button>
+                                    )}
+                                    <button onClick={() => deleteSchedule(s.id)} className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <DetailsModal
+                open={!!details}
+                title={details?.title}
+                rows={details?.rows || []}
+                onClose={() => setDetails(null)}
+            />
         </div>
     );
 }

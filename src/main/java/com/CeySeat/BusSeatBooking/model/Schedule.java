@@ -15,4 +15,5 @@ public class Schedule {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private double fare;
+    private ScheduleStatus status = ScheduleStatus.PENDING;
 }

@@ -27,8 +27,8 @@ export default function Layout({ children }) {
             <RouteTransition />
             <header className="bg-brand-700 text-white shadow-lg shadow-brand-900/10 sticky top-0 z-30 border-b border-brand-800/50">
                 <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 bg-white rounded-lg px-2.5 py-1 shadow-sm">
-                        <img src={logo} alt="CeySeat" className="h-11 w-auto" />
+                    <Link to="/" className="flex items-center">
+                        <img src={logo} alt="CeySeat" className="h-20 w-auto" />
                     </Link>
 
                     <nav className="flex items-center gap-5 text-sm font-medium">
@@ -116,10 +116,11 @@ export default function Layout({ children }) {
 
             <footer className="bg-brand-900 text-brand-200 py-8 mt-8">
                 <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 bg-white rounded-lg px-2 py-1">
-                        <img src={logo} alt="CeySeat" className="h-8 w-auto" />
+                    <div className="flex items-center">
+                        <img src={logo} alt="CeySeat" className="h-20 w-auto" />
                     </div>
                     <p className="text-sm text-brand-300">© 2026 CeySeat — Book your journey across Sri Lanka</p>
+                    <p className="text-sm text-brand-300">Design and Develop by <a href="https://galacticweb.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-accent-400 hover:underline">GalacticWeb</a></p>
                 </div>
             </footer>
         </div>

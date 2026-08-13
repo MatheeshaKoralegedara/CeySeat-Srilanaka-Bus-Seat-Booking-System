@@ -1,21 +1,24 @@
-package com.CeySeat.BusSeatBooking.model;
+package com.CeySeat.BusSeatBooking.dto;
 
+import com.CeySeat.BusSeatBooking.model.BusType;
+import com.CeySeat.BusSeatBooking.model.Seat;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.List;
 
 @Data
-@Document(collection = "buses")
-public class Bus {
-    @Id
+@AllArgsConstructor
+public class BusResponse {
     private String id;
     private String operatorId;
+    private String operatorName;
+    private String operatorEmail;
     private String registrationNo;
     private String model;
     private int totalSeats;
     private List<Seat> seatLayout;
-    private String layoutType; // "2+2", "3+2", etc.
+    private String layoutType;
     private String travelName;
     private BusType busType;
     private String contactNumber;

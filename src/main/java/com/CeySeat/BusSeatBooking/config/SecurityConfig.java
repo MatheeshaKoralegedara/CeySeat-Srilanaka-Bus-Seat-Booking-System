@@ -49,6 +49,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/buses/**", "/api/schedules/**", "/api/bookings/*/seats").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/buses/**", "/api/schedules/**").hasAnyRole("OPERATOR", "ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/buses/**", "/api/schedules/**").hasAnyRole("OPERATOR", "ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/buses/**", "/api/schedules/**").hasAnyRole("OPERATOR", "ADMIN")
             .anyRequest().authenticated()
         )
         .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)

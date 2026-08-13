@@ -7,6 +7,7 @@ import com.CeySeat.BusSeatBooking.exception.SeatUnavailableException;
 import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
+import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import org.springframework.dao.DuplicateKeyException;
@@ -34,6 +35,10 @@ public class BookingService {
     public List<BookingResponse> reserveSeats(ReserveSeatsRequest request, String userId) {
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new NotFoundException("Schedule not found: " + request.getScheduleId()));
+
+        if (schedule.getStatus() != ScheduleStatus.APPROVED) {
+            throw new SeatUnavailableException("This schedule is not currently open for booking.");
+        }
 
         String groupId = UUID.randomUUID().toString();
         List<Booking> saved = new ArrayList<>();

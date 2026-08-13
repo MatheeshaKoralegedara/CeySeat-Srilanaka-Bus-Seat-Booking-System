@@ -13,6 +13,7 @@ export default function Schedules() {
     const [date, setDate] = useState('');
     const [schedules, setSchedules] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sortBy, setSortBy] = useState('departure');
     const navigate = useNavigate();
 
     function search() {
@@ -41,6 +42,23 @@ export default function Schedules() {
             hour: 'numeric', minute: '2-digit',
         });
     }
+
+    function durationMs(s) {
+        return new Date(s.arrivalTime) - new Date(s.departureTime);
+    }
+
+    function formatDuration(ms) {
+        const totalMinutes = Math.round(ms / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+
+    const sortedSchedules = [...schedules].sort((a, b) => {
+        if (sortBy === 'price') return a.fare - b.fare;
+        if (sortBy === 'duration') return durationMs(a) - durationMs(b);
+        return new Date(a.departureTime) - new Date(b.departureTime);
+    });
 
     return (
         <div>
@@ -92,8 +110,26 @@ export default function Schedules() {
                 </div>
             )}
 
+            {!loading && schedules.length > 0 && (
+                <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm text-gray-500">{schedules.length} bus{schedules.length > 1 ? 'es' : ''} found</p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 uppercase font-semibold hidden sm:inline">Sort by</span>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+                        >
+                            <option value="departure">Earliest Departure</option>
+                            <option value="price">Lowest Price</option>
+                            <option value="duration">Shortest Duration</option>
+                        </select>
+                    </div>
+                </div>
+            )}
+
             <div className="grid gap-4">
-                {schedules.map((s) => (
+                {sortedSchedules.map((s) => (
                     <div
                         key={s.id}
                         className="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-lg hover:shadow-brand-900/5 hover:border-brand-200 transition-all"
@@ -110,6 +146,7 @@ export default function Schedules() {
                                 </h2>
                                 <p className="text-gray-500 text-sm">
                                     {formatDate(s.departureTime)} → {formatDate(s.arrivalTime)}
+                                    <span className="text-gray-400"> · {formatDuration(durationMs(s))}</span>
                                 </p>
                             </div>
                         </div>

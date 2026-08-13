@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -42,15 +44,22 @@ public class PaymentNotifyController {
 
         // status_code "2" = success, per PayHere's documented status codes
         if ("2".equals(statusCode)) {
-            bookingRepository.findById(orderId).ifPresentOrElse(booking -> {
-                if (booking.getStatus() == BookingStatus.RESERVED) {
-                    booking.setStatus(BookingStatus.PAID);
-                    booking.setPaymentReference(paymentId);
-                    bookingRepository.save(booking);
-                    log.info("Booking {} marked PAID via PayHere notify", orderId);
-                }
-                // if already PAID or EXPIRED, do nothing — notify can arrive more than once
-            }, () -> log.warn("PayHere notify for unknown booking {}", orderId));
+            List<Booking> group = bookingRepository.findByGroupBookingId(orderId);
+
+            if (group.isEmpty()) {
+                log.warn("PayHere notify for unknown booking group {}", orderId);
+            } else {
+                group.stream()
+                        .filter(b -> b.getStatus() == BookingStatus.RESERVED)
+                        .forEach(b -> {
+                            b.setStatus(BookingStatus.PAID);
+                            b.setPaymentReference(paymentId);
+                        });
+                // save() rewrites every booking in the group — no-op for ones
+                // already PAID, so this stays idempotent if notify arrives twice.
+                bookingRepository.saveAll(group);
+                log.info("Booking group {} marked PAID via PayHere notify", orderId);
+            }
         } else {
             log.info("PayHere notify for order {} with non-success status {}", orderId, statusCode);
             // status_code -1 = cancelled, -2 = failed, -3 = chargedback — leave booking as-is,

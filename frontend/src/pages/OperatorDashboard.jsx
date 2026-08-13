@@ -47,7 +47,10 @@ export default function OperatorDashboard() {
     function generateSeatLayout(totalSeats, layoutType, hasRearBench, rearBenchSize) {
         const is3plus2 = layoutType === '3+2';
         const seatsPerRow = is3plus2 ? 5 : 4;
-        const leftCount = is3plus2 ? 3 : 2;
+        // Sri Lankan buses are right-hand drive, so on a 3+2 layout the
+        // 3-seat block sits on the right (driver's side) and the 2-seat
+        // block on the left — not the other way around.
+        const leftCount = is3plus2 ? 2 : 2;
 
         const benchCount = hasRearBench ? Number(rearBenchSize) : 0;
         const frontSeatTarget = Math.max(0, totalSeats - benchCount);

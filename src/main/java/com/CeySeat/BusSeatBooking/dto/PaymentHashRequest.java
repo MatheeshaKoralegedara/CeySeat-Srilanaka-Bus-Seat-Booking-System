@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class PaymentHashRequest {
     @NotBlank
-    private String bookingId;    
+    private String groupBookingId;
 }

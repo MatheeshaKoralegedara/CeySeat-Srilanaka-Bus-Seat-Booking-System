@@ -5,6 +5,9 @@ import client from '../api/client';
 import { SkeletonBlock } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 import GenderModal from '../components/GenderModal';
+import BookingSteps from '../components/BookingSteps';
+
+const MAX_SEATS = 6;
 
 function groupByRow(seatLayout) {
     const rows = {};
@@ -22,9 +25,10 @@ export default function SeatSelect() {
     const { scheduleId } = useParams();
     const [seatLayout, setSeatLayout] = useState([]);
     const [busInfo, setBusInfo] = useState(null);
+    const [schedule, setSchedule] = useState(null);
     const [bookedSeats, setBookedSeats] = useState([]);
     const [seatGenders, setSeatGenders] = useState({});
-    const [selected, setSelected] = useState(null);
+    const [selectedSeats, setSelectedSeats] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [reserving, setReserving] = useState(false);
@@ -39,6 +43,7 @@ export default function SeatSelect() {
                 const busRes = await client.get(`/buses/${scheduleRes.data.busId}`);
                 const seatsRes = await client.get(`/bookings/${scheduleId}/seats`);
 
+                setSchedule(scheduleRes.data);
                 setBusInfo(busRes.data);
                 setSeatLayout(busRes.data.seatLayout || []);
                 setBookedSeats(seatsRes.data.map((b) => b.seatNo));
@@ -54,6 +59,14 @@ export default function SeatSelect() {
         load();
     }, [scheduleId]);
 
+    function toggleSeat(seatNo) {
+        setSelectedSeats((prev) => {
+            if (prev.includes(seatNo)) return prev.filter((s) => s !== seatNo);
+            if (prev.length >= MAX_SEATS) return prev;
+            return [...prev, seatNo];
+        });
+    }
+
     function handleReserveClick() {
         if (!user) {
             navigate('/login');
@@ -62,26 +75,26 @@ export default function SeatSelect() {
         setShowGenderModal(true);
     }
 
-    async function confirmReserve(gender) {
+    async function confirmReserve(passengerGenders) {
         setShowGenderModal(false);
         setError('');
         setReserving(true);
         try {
             const res = await client.post('/bookings/reserve', {
                 scheduleId,
-                seatNumbers: [selected],
-                passengerGender: gender,
+                seatNumbers: selectedSeats,
+                passengerGenders,
             });
-            navigate(`/payment/${res.data[0].id}`);
+            navigate(`/payment/${res.data[0].groupBookingId}`);
         } catch (err) {
-            setError(err.response?.data?.error || 'Could not reserve seat');
+            setError(err.response?.data?.error || 'Could not reserve seat(s)');
             setReserving(false);
         }
     }
 
     function seatState(seatNo) {
         if (bookedSeats.includes(seatNo)) return 'taken';
-        if (selected === seatNo) return 'selected';
+        if (selectedSeats.includes(seatNo)) return 'selected';
         return 'available';
     }
 
@@ -90,6 +103,11 @@ export default function SeatSelect() {
         selected: 'bg-brand-600 border-2 border-brand-600 text-white cursor-pointer shadow-md shadow-brand-600/30 scale-105',
         taken: 'bg-gray-100 border-2 border-gray-100 text-gray-300 cursor-not-allowed',
     };
+
+    const totalSeats = seatLayout.length;
+    const seatsLeft = totalSeats - bookedSeats.length;
+    const fare = schedule?.fare || 0;
+    const total = fare * selectedSeats.length;
 
     if (loading) {
         return (
@@ -124,10 +142,20 @@ export default function SeatSelect() {
     const rows = groupByRow(seatLayout);
 
     return (
-        <div className="max-w-md mx-auto">
-            <h1 className="font-display text-2xl font-bold text-gray-900 mb-1">{t('seats.title')}</h1>
+        <div className="max-w-md mx-auto pb-28">
+            <BookingSteps current={1} />
+
+            <div className="flex items-center justify-between mb-1">
+                <h1 className="font-display text-2xl font-bold text-gray-900">{t('seats.title')}</h1>
+                {seatsLeft <= 8 && (
+                    <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full">
+                        Only {seatsLeft} seats left
+                    </span>
+                )}
+            </div>
             <p className="text-gray-500 text-sm mb-8">
                 {busInfo?.model} · {busInfo?.totalSeats} seats
+                {selectedSeats.length < MAX_SEATS ? '' : ` · max ${MAX_SEATS} seats per booking`}
             </p>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
@@ -154,7 +182,7 @@ export default function SeatSelect() {
                                             <button
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
-                                                onClick={() => setSelected(seat.seatNo)}
+                                                onClick={() => toggleSeat(seat.seatNo)}
                                                 className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
@@ -182,7 +210,7 @@ export default function SeatSelect() {
                                             <button
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
-                                                onClick={() => setSelected(seat.seatNo)}
+                                                onClick={() => toggleSeat(seat.seatNo)}
                                                 className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
@@ -205,7 +233,7 @@ export default function SeatSelect() {
                                             <button
                                                 key={seat.seatNo}
                                                 disabled={state === 'taken'}
-                                                onClick={() => setSelected(seat.seatNo)}
+                                                onClick={() => toggleSeat(seat.seatNo)}
                                                 className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
                                             >
                                                 {seat.seatNo}
@@ -236,6 +264,14 @@ export default function SeatSelect() {
                         <div className="w-4 h-4 rounded bg-gray-200"></div>
                         {t('seats.taken')}
                     </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-pink-500"></div>
+                        Female
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        Male
+                    </div>
                 </div>
             </div>
 
@@ -243,17 +279,46 @@ export default function SeatSelect() {
                 <p className="text-red-600 text-sm mt-4 text-center bg-red-50 border border-red-100 rounded-lg px-4 py-2">{error}</p>
             )}
 
-            <button
-                disabled={!selected || reserving}
-                onClick={handleReserveClick}
-                className="w-full mt-6 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-4 rounded-xl transition-colors shadow-md shadow-accent-600/25 disabled:shadow-none"
-            >
-                {reserving ? t('seats.reserving') : selected ? `${t('seats.reserveSeat')} ${selected}` : t('seats.selectToContinue')}
-            </button>
+            {/* Sticky selection summary bar */}
+            <div className="fixed bottom-0 left-0 right-0 z-20">
+                <div className="max-w-md mx-auto px-4 pb-4">
+                    <div className="bg-white rounded-2xl shadow-2xl shadow-brand-900/20 border border-gray-200 p-4">
+                        {selectedSeats.length > 0 ? (
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex flex-wrap gap-1.5">
+                                    {selectedSeats.map((s) => (
+                                        <span key={s} className="text-xs font-bold bg-brand-50 text-brand-700 px-2 py-1 rounded-md">
+                                            {s}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="text-right flex-shrink-0 pl-3">
+                                    <p className="text-xs text-gray-400">{selectedSeats.length} seat{selectedSeats.length > 1 ? 's' : ''}</p>
+                                    <p className="font-display text-lg font-bold text-brand-700">Rs. {total}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-400 text-center mb-3">{t('seats.selectToContinue')}</p>
+                        )}
+                        <button
+                            disabled={selectedSeats.length === 0 || reserving}
+                            onClick={handleReserveClick}
+                            className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-3.5 rounded-xl transition-colors shadow-md shadow-accent-600/25 disabled:shadow-none"
+                        >
+                            {reserving
+                                ? t('seats.reserving')
+                                : selectedSeats.length > 0
+                                ? `${t('seats.reserveSeat')} · Rs. ${total}`
+                                : t('seats.selectToContinue')}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <GenderModal
                 open={showGenderModal}
-                onSelect={confirmReserve}
+                seats={selectedSeats}
+                onConfirm={confirmReserve}
                 onCancel={() => setShowGenderModal(false)}
             />
         </div>

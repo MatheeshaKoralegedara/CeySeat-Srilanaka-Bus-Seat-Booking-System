@@ -42,6 +42,14 @@ public class BookingService {
         // (scheduleId, seatNo) for RESERVED/PAID bookings means MongoDB
         // itself rejects a duplicate seat - no read-then-write race window.
         for (String seatNo : request.getSeatNumbers()) {
+            String gender = request.getPassengerGenders().get(seatNo);
+            if (gender == null || gender.isBlank()) {
+                // IllegalArgumentException is reserved for auth (401 handler) elsewhere in
+                // this app, so a plain validation failure here maps to 409 instead of 400 —
+                // acceptable since this only triggers on a malformed request, never real usage.
+                throw new IllegalStateException("Missing passenger gender for seat " + seatNo);
+            }
+
             Booking booking = new Booking();
             booking.setScheduleId(request.getScheduleId());
             booking.setUserId(userId);
@@ -50,7 +58,7 @@ public class BookingService {
             booking.setStatus(BookingStatus.RESERVED);
             booking.setReservedUntil(LocalDateTime.now().plusMinutes(HOLD_MINUTES));
             booking.setFare(schedule.getFare());
-            booking.setPassengerGender(request.getPassengerGender());
+            booking.setPassengerGender(gender);
 
             try {
                 saved.add(bookingRepository.save(booking));
@@ -89,7 +97,7 @@ public class BookingService {
     }
 
     private BookingResponse toResponse(Booking b) {
-        return new BookingResponse(b.getId(), b.getScheduleId(), b.getSeatNo(),
+        return new BookingResponse(b.getId(), b.getScheduleId(), b.getGroupBookingId(), b.getSeatNo(),
                 b.getStatus(), b.getReservedUntil(), b.getFare(), b.getPassengerGender());
     }
 

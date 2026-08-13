@@ -10,6 +10,22 @@ const statusStyles = {
     CANCELLED: 'bg-red-100 text-red-600',
 };
 
+function groupBookings(bookings) {
+    const groups = new Map();
+    for (const b of bookings) {
+        const key = b.groupBookingId || b.id;
+        if (!groups.has(key)) {
+            groups.set(key, { groupBookingId: key, seats: [], status: b.status, reservedUntil: b.reservedUntil, totalFare: 0, firstId: b.id });
+        }
+        const g = groups.get(key);
+        g.seats.push(b.seatNo);
+        g.totalFare += b.fare;
+        // If any seat in the group is still RESERVED, treat the whole group as RESERVED for display.
+        if (b.status === 'RESERVED') g.status = 'RESERVED';
+    }
+    return Array.from(groups.values());
+}
+
 export default function MyBookings() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -33,11 +49,15 @@ export default function MyBookings() {
         );
     }
 
+    const groups = groupBookings(bookings).sort((a, b) =>
+        new Date(b.reservedUntil || 0) - new Date(a.reservedUntil || 0)
+    );
+
     return (
         <div>
             <h1 className="font-display text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
 
-            {bookings.length === 0 && (
+            {groups.length === 0 && (
                 <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
                     <div className="w-14 h-14 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-4">
                         <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -55,19 +75,33 @@ export default function MyBookings() {
             )}
 
             <div className="grid gap-4">
-                {bookings.map((b) => (
+                {groups.map((g) => (
                     <div
-                        key={b.id}
+                        key={g.groupBookingId}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-md hover:border-brand-200 transition-all"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0 font-bold text-sm">
-                                {b.seatNo}
+                            <div className="flex -space-x-2 flex-shrink-0">
+                                {g.seats.slice(0, 3).map((seatNo) => (
+                                    <div
+                                        key={seatNo}
+                                        className="w-11 h-11 rounded-lg bg-brand-50 text-brand-600 border-2 border-white flex items-center justify-center font-bold text-xs"
+                                    >
+                                        {seatNo}
+                                    </div>
+                                ))}
+                                {g.seats.length > 3 && (
+                                    <div className="w-11 h-11 rounded-lg bg-gray-100 text-gray-500 border-2 border-white flex items-center justify-center font-bold text-xs">
+                                        +{g.seats.length - 3}
+                                    </div>
+                                )}
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-900">Seat {b.seatNo}</p>
+                                <p className="font-semibold text-gray-900">
+                                    {g.seats.length > 1 ? `${g.seats.length} seats` : 'Seat'} {g.seats.length === 1 ? g.seats[0] : `(${g.seats.join(', ')})`}
+                                </p>
                                 <p className="text-sm text-gray-500">
-                                    {b.reservedUntil && new Date(b.reservedUntil).toLocaleDateString('en-US', {
+                                    {g.reservedUntil && new Date(g.reservedUntil).toLocaleDateString('en-US', {
                                         month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
@@ -75,13 +109,13 @@ export default function MyBookings() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <span className="font-bold text-brand-700">Rs. {b.fare}</span>
-                            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyles[b.status] || 'bg-gray-100 text-gray-500'}`}>
-                                {b.status}
+                            <span className="font-bold text-brand-700">Rs. {g.totalFare}</span>
+                            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyles[g.status] || 'bg-gray-100 text-gray-500'}`}>
+                                {g.status}
                             </span>
-                            {b.status === 'RESERVED' && (
+                            {g.status === 'RESERVED' && (
                                 <Link
-                                    to={`/payment/${b.id}`}
+                                    to={`/payment/${g.groupBookingId}`}
                                     className="text-sm text-accent-600 font-semibold hover:underline"
                                 >
                                     Pay Now

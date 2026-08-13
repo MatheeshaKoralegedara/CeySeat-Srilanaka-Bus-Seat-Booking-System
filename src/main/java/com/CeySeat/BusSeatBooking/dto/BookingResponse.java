@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class BookingResponse {
     private String id;
     private String scheduleId;
+    private String groupBookingId;
     private String seatNo;
     private BookingStatus status;
     private LocalDateTime reservedUntil;

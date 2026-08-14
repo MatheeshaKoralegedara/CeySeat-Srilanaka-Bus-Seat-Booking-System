@@ -15,7 +15,9 @@ import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
@@ -31,6 +33,7 @@ public class AdminController {
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
     private final BusRepository busRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private ScheduleResponse toScheduleResponse(Schedule schedule) {
         Bus bus = busRepository.findById(schedule.getBusId()).orElse(null);
@@ -100,6 +103,30 @@ public class AdminController {
     @GetMapping("/users")
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<User> createUser(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) {
+            throw new IllegalStateException("Email is required.");
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalStateException("An account with this email already exists.");
+        }
+        String password = body.get("password");
+        if (password == null || password.length() < 8) {
+            throw new IllegalStateException("Password must be at least 8 characters long.");
+        }
+
+        User user = new User();
+        user.setFullName(body.get("fullName"));
+        user.setEmail(email);
+        user.setPhone(body.get("phone"));
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(body.get("role") != null ? Role.valueOf(body.get("role")) : Role.USER);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(userRepository.save(user));
     }
 
     @PutMapping("/users/{userId}/role")

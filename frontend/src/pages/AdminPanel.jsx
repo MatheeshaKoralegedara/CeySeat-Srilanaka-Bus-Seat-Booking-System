@@ -26,6 +26,10 @@ export default function AdminPanel() {
     const [buses, setBuses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [details, setDetails] = useState(null);
+    const [showAddUser, setShowAddUser] = useState(false);
+    const [newUser, setNewUser] = useState({ fullName: '', email: '', phone: '', password: '', role: 'USER' });
+    const [addUserError, setAddUserError] = useState('');
+    const [addingUser, setAddingUser] = useState(false);
 
     function loadSchedules() {
         client.get('/admin/schedules').then((res) => setSchedules(res.data)).catch(() => setSchedules([]));
@@ -83,6 +87,39 @@ export default function AdminPanel() {
                 { label: 'Seats Available', value: `${s.availableSeats} / ${s.totalSeats}` },
             ],
         });
+    }
+
+    function viewUserDetails(u) {
+        setDetails({
+            title: u.fullName || u.email,
+            rows: [
+                { label: 'Full Name', value: u.fullName },
+                { label: 'Email', value: u.email },
+                { label: 'Phone', value: u.phone },
+                { label: 'Role', value: u.role },
+            ],
+        });
+    }
+
+    function openAddUser() {
+        setNewUser({ fullName: '', email: '', phone: '', password: '', role: 'USER' });
+        setAddUserError('');
+        setShowAddUser(true);
+    }
+
+    async function submitAddUser(e) {
+        e.preventDefault();
+        setAddUserError('');
+        setAddingUser(true);
+        try {
+            const res = await client.post('/admin/users', newUser);
+            setUsers((prev) => [...prev, res.data]);
+            setShowAddUser(false);
+        } catch (err) {
+            setAddUserError(err.response?.data?.error || 'Could not create user');
+        } finally {
+            setAddingUser(false);
+        }
     }
 
     async function changeRole(userId, newRole) {
@@ -195,35 +232,51 @@ export default function AdminPanel() {
             )}
 
             {tab === 'users' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-left">
-                            <tr>
-                                <th className="px-4 py-3 font-medium">Name</th>
-                                <th className="px-4 py-3 font-medium">Email</th>
-                                <th className="px-4 py-3 font-medium">Role</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {users.map((u) => (
-                                <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{u.fullName}</td>
-                                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{u.email}</td>
-                                    <td className="px-4 py-3">
-                                        <select
-                                            value={u.role}
-                                            onChange={(e) => changeRole(u.id, e.target.value)}
-                                            className="border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
-                                        >
-                                            {roleOptions.map((r) => (
-                                                <option key={r} value={r}>{r}</option>
-                                            ))}
-                                        </select>
-                                    </td>
+                <div>
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={openAddUser}
+                            className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm shadow-accent-700/30"
+                        >
+                            + Add User
+                        </button>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <table className="w-full text-sm">
+                            <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-left">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium">Name</th>
+                                    <th className="px-4 py-3 font-medium">Email</th>
+                                    <th className="px-4 py-3 font-medium">Role</th>
+                                    <th className="px-4 py-3 font-medium"></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                {users.map((u) => (
+                                    <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{u.fullName}</td>
+                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{u.email}</td>
+                                        <td className="px-4 py-3">
+                                            <select
+                                                value={u.role}
+                                                onChange={(e) => changeRole(u.id, e.target.value)}
+                                                className="border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+                                            >
+                                                {roleOptions.map((r) => (
+                                                    <option key={r} value={r}>{r}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <button onClick={() => viewUserDetails(u)} className="text-xs font-semibold text-brand-600 dark:text-brand-300 hover:underline">
+                                                Profile
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
@@ -338,6 +391,83 @@ export default function AdminPanel() {
                 rows={details?.rows || []}
                 onClose={() => setDetails(null)}
             />
+
+            {showAddUser && (
+                <div className="fixed inset-0 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddUser(false)}>
+                    <form
+                        onSubmit={submitAddUser}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 scale-in"
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="font-display text-lg font-bold text-gray-900 dark:text-gray-100">Add User</h2>
+                            <button
+                                type="button"
+                                onClick={() => setShowAddUser(false)}
+                                className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            <input
+                                required
+                                placeholder="Full name"
+                                value={newUser.fullName}
+                                onChange={(e) => setNewUser((p) => ({ ...p, fullName: e.target.value }))}
+                                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                            <input
+                                required
+                                type="email"
+                                placeholder="Email"
+                                value={newUser.email}
+                                onChange={(e) => setNewUser((p) => ({ ...p, email: e.target.value }))}
+                                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                            <input
+                                placeholder="Phone"
+                                value={newUser.phone}
+                                onChange={(e) => setNewUser((p) => ({ ...p, phone: e.target.value }))}
+                                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                            <input
+                                required
+                                type="password"
+                                minLength={8}
+                                placeholder="Password (min 8 characters)"
+                                value={newUser.password}
+                                onChange={(e) => setNewUser((p) => ({ ...p, password: e.target.value }))}
+                                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            />
+                            <select
+                                value={newUser.role}
+                                onChange={(e) => setNewUser((p) => ({ ...p, role: e.target.value }))}
+                                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
+                            >
+                                {roleOptions.map((r) => (
+                                    <option key={r} value={r}>{r}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {addUserError && (
+                            <p className="text-red-600 dark:text-red-400 text-sm mt-3 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg px-3 py-2">{addUserError}</p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={addingUser}
+                            className="w-full mt-6 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-brand-900 font-semibold py-2.5 rounded-xl transition-colors"
+                        >
+                            {addingUser ? 'Creating...' : 'Create User'}
+                        </button>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

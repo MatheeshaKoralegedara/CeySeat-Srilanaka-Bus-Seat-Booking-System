@@ -3,6 +3,7 @@ package com.CeySeat.BusSeatBooking.service;
 import com.CeySeat.BusSeatBooking.dto.ReserveSeatsRequest;
 import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.Schedule;
+import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,9 +37,11 @@ class BookingServiceTest {
         ReserveSeatsRequest request = new ReserveSeatsRequest();
         request.setScheduleId("schedule-1");
         request.setSeatNumbers(List.of("A1"));
+        request.setPassengerGenders(Map.of("A1", "MALE"));
 
         Schedule schedule = new Schedule();
         schedule.setFare(42.5);
+        schedule.setStatus(ScheduleStatus.APPROVED);
 
         when(scheduleRepository.findById("schedule-1")).thenReturn(Optional.of(schedule));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {

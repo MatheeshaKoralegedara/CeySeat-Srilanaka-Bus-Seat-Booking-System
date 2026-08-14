@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-50: #fbeef1;
+  --color-brand-100: #f3d6dc;
+  --color-brand-200: #e3aab6;
+  --color-brand-300: #cd7c8c;
+  --color-brand-400: #a8465e;
+  --color-brand-500: #872538;
+  --color-brand-600: #6c1c2c;
+  --color-brand-700: #551523;
+  --color-brand-800: #400f1a;
+  --color-brand-900: #2c0a12;
+
+  --color-accent-50: #fdf7e8;
+  --color-accent-100: #faebc0;
+  --color-accent-400: #f0b429;
+  --color-accent-500: #dc9e1c;
+  --color-accent-600: #b37f12;
+  --color-accent-700: #8f640d;
+
+  --color-surface: #f8f7f5;
+  --color-surface-dark: #14181c;
+
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+@media print {
+  header, footer, .no-print {
+    display: none !important;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--color-surface);
+  transition: background-color 0.2s ease;
+}
+
+.dark body {
+  background-color: var(--color-surface-dark);
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+@keyframes busDrive {
+    0% { left: -40px; }
+    100% { left: 100%; }
+}
+
+@keyframes roadFill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.animate-bus-drive {
+    animation: busDrive 0.6s ease-in-out forwards;
+    position: absolute;
+}
+
+.animate-road-fill {
+    animation: roadFill 0.6s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.scale-in {
+  animation: scaleIn 0.18s ease-out;
+}
+
+::selection {
+  background-color: var(--color-accent-400);
+  color: var(--color-brand-900);
+}
+
+@keyframes festiveFall {
+    0% {
+        transform: translateY(-20px) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    15% { opacity: 0.7; }
+    85% { opacity: 0.7; }
+    100% {
+        transform: translateY(90px) translateX(15px) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+.animate-festive-fall {
+    animation-name: festiveFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}

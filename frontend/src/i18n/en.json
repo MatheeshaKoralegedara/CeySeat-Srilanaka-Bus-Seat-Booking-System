@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "buses": "Buses",
+    "myBookings": "My Bookings",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "hi": "Hi"
+  },
+  "home": {
+    "heroTitle": "Travel Sri Lanka, seat by seat",
+    "heroSubtitle": "Book your bus seat in minutes. Real-time availability, secure payment, instant confirmation.",
+    "from": "From",
+    "to": "To",
+    "search": "Search Buses",
+    "secure": "Secure Payments",
+    "instant": "Instant Confirmation",
+    "verified": "Verified Operators",
+    "support": "24/7 Support",
+    "popularRoutes": "Popular Routes",
+    "fromPrice": "From Rs."
+  },
+  "schedules": {
+    "title": "Find your bus",
+    "subtitle": "Search available routes across Sri Lanka",
+    "date": "Date",
+    "search": "Search",
+    "loading": "Loading schedules...",
+    "noResults": "No schedules found.",
+    "tryDifferent": "Try a different route or date.",
+    "selectSeats": "Select Seats"
+  },
+  "seats": {
+    "title": "Select your seat",
+    "driver": "Driver",
+    "available": "Available",
+    "selected": "Selected",
+    "taken": "Taken",
+    "reserving": "Reserving...",
+    "selectToContinue": "Select a seat to continue",
+    "reserveSeat": "Reserve Seat",
+    "selectGenderTitle": "Select Gender",
+    "selectGenderNote": "Please be mindful if the next seat is booked by a passenger of the opposite gender.",
+    "male": "Male",
+    "female": "Female",
+    "cancel": "Cancel"
+  },
+  "payment": {
+    "totalAmount": "Total amount",
+    "payWith": "Pay with PayHere",
+    "processing": "Processing...",
+    "secureNote": "Secure payment powered by PayHere",
+    "confirmed": "Booking Confirmed",
+    "ticketReady": "Your e-ticket is ready",
+    "showQr": "Show this QR code to the conductor",
+    "amountPaid": "Amount Paid",
+    "paymentId": "Payment ID",
+    "status": "Status",
+    "confirmedStatus": "Confirmed",
+    "download": "Download Ticket",
+    "bookAnother": "Book Another"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "loginSubtitle": "Log in to book your next trip",
+    "email": "Email",
+    "password": "Password",
+    "logIn": "Log In",
+    "loggingIn": "Logging in...",
+    "noAccount": "No account?",
+    "register": "Register",
+    "createAccount": "Create your account",
+    "registerSubtitle": "Book bus seats across Sri Lanka",
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "minChars": "Minimum 8 characters",
+    "creatingAccount": "Creating account...",
+    "haveAccount": "Already have an account?"
+  },
+  "greeting": {
+    "morning": "Good Morning",
+    "afternoon": "Good Afternoon",
+    "evening": "Good Evening",
+    "night": "Good Night"
+  }
+}

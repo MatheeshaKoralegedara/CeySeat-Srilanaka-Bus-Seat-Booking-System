@@ -6,8 +6,9 @@ import { SkeletonBlock } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 import GenderModal from '../components/GenderModal';
 import BookingSteps from '../components/BookingSteps';
-
-const MAX_SEATS = 6;
+import SeatButton from '../components/SeatButton';
+import Badge from '../components/Badge';
+import { LOW_SEATS_THRESHOLD, MAX_SEATS_PER_BOOKING } from '../constants';
 
 const busTypeLabels = {
     NORMAL: 'Normal',
@@ -68,7 +69,7 @@ export default function SeatSelect() {
     function toggleSeat(seatNo) {
         setSelectedSeats((prev) => {
             if (prev.includes(seatNo)) return prev.filter((s) => s !== seatNo);
-            if (prev.length >= MAX_SEATS) return prev;
+            if (prev.length >= MAX_SEATS_PER_BOOKING) return prev;
             return [...prev, seatNo];
         });
     }
@@ -103,12 +104,6 @@ export default function SeatSelect() {
         if (selectedSeats.includes(seatNo)) return 'selected';
         return 'available';
     }
-
-    const seatStyles = {
-        available: 'bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/40 hover:-translate-y-0.5 cursor-pointer shadow-sm',
-        selected: 'bg-brand-600 border-2 border-brand-600 text-white cursor-pointer shadow-md shadow-brand-600/30 scale-105',
-        taken: 'bg-gray-100 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed',
-    };
 
     const totalSeats = seatLayout.length;
     const seatsLeft = totalSeats - bookedSeats.length;
@@ -153,10 +148,8 @@ export default function SeatSelect() {
 
             <div className="flex items-center justify-between mb-1">
                 <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-gray-100">{t('seats.title')}</h1>
-                {seatsLeft <= 8 && (
-                    <span className="text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2.5 py-1 rounded-full">
-                        Only {seatsLeft} seats left
-                    </span>
+                {seatsLeft <= LOW_SEATS_THRESHOLD && (
+                    <Badge variant="orange">Only {seatsLeft} seats left</Badge>
                 )}
             </div>
             {busInfo?.travelName && (
@@ -165,12 +158,12 @@ export default function SeatSelect() {
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">
                 {busInfo?.model} · {busInfo?.totalSeats} seats
                 {busInfo?.busType && ` · ${busTypeLabels[busInfo.busType] || busInfo.busType}`}
-                {selectedSeats.length < MAX_SEATS ? '' : ` · max ${MAX_SEATS} seats per booking`}
+                {selectedSeats.length < MAX_SEATS_PER_BOOKING ? '' : ` · max ${MAX_SEATS_PER_BOOKING} seats per booking`}
             </p>
             <div className="mb-8">
                 {busInfo?.contactNumber && (
                     <p className="text-gray-400 dark:text-gray-500 text-xs flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
                         {busInfo.contactNumber}
@@ -181,7 +174,7 @@ export default function SeatSelect() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                 <div className="flex justify-end mb-4 pr-1">
                     <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-xs font-medium">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="12" cy="12" r="8" />
                             <path strokeLinecap="round" d="M12 4v4m0 8v4m8-8h-4M8 12H4" />
                         </svg>
@@ -196,24 +189,15 @@ export default function SeatSelect() {
                         if (isRearBench) {
                             return (
                                 <div key={i} className="flex justify-center gap-2 mt-3 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700">
-                                    {rowSeats.map((seat) => {
-                                        const state = seatState(seat.seatNo);
-                                        return (
-                                            <button
-                                                key={seat.seatNo}
-                                                disabled={state === 'taken'}
-                                                onClick={() => toggleSeat(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
-                                            >
-                                                {seat.seatNo}
-                                                {state === 'taken' && seatGenders[seat.seatNo] && (
-                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
-                                                        seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
-                                                    }`} />
-                                                )}
-                                            </button>
-                                        );
-                                    })}
+                                    {rowSeats.map((seat) => (
+                                        <SeatButton
+                                            key={seat.seatNo}
+                                            seat={seat}
+                                            state={seatState(seat.seatNo)}
+                                            gender={seatGenders[seat.seatNo]}
+                                            onToggle={toggleSeat}
+                                        />
+                                    ))}
                                 </div>
                             );
                         }
@@ -224,47 +208,29 @@ export default function SeatSelect() {
                         return (
                             <div key={i} className="flex items-center justify-center gap-3">
                                 <div className="flex gap-2">
-                                    {left.map((seat) => {
-                                        const state = seatState(seat.seatNo);
-                                        return (
-                                            <button
-                                                key={seat.seatNo}
-                                                disabled={state === 'taken'}
-                                                onClick={() => toggleSeat(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
-                                            >
-                                                {seat.seatNo}
-                                                {state === 'taken' && seatGenders[seat.seatNo] && (
-                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
-                                                        seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
-                                                    }`} />
-                                                )}
-                                            </button>
-                                        );
-                                    })}
+                                    {left.map((seat) => (
+                                        <SeatButton
+                                            key={seat.seatNo}
+                                            seat={seat}
+                                            state={seatState(seat.seatNo)}
+                                            gender={seatGenders[seat.seatNo]}
+                                            onToggle={toggleSeat}
+                                        />
+                                    ))}
                                 </div>
 
                                 <div className="w-6"></div> {/* aisle */}
 
                                 <div className="flex gap-2">
-                                    {right.map((seat) => {
-                                        const state = seatState(seat.seatNo);
-                                        return (
-                                            <button
-                                                key={seat.seatNo}
-                                                disabled={state === 'taken'}
-                                                onClick={() => toggleSeat(seat.seatNo)}
-                                                className={`w-11 h-11 rounded-lg font-semibold text-xs transition-all relative ${seatStyles[state]}`}
-                                            >
-                                                {seat.seatNo}
-                                                {state === 'taken' && seatGenders[seat.seatNo] && (
-                                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
-                                                        seatGenders[seat.seatNo] === 'FEMALE' ? 'bg-pink-500' : 'bg-blue-500'
-                                                    }`} />
-                                                )}
-                                            </button>
-                                        );
-                                    })}
+                                    {right.map((seat) => (
+                                        <SeatButton
+                                            key={seat.seatNo}
+                                            seat={seat}
+                                            state={seatState(seat.seatNo)}
+                                            gender={seatGenders[seat.seatNo]}
+                                            onToggle={toggleSeat}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         );
@@ -307,9 +273,7 @@ export default function SeatSelect() {
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex flex-wrap gap-1.5">
                                     {selectedSeats.map((s) => (
-                                        <span key={s} className="text-xs font-bold bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 px-2 py-1 rounded-md">
-                                            {s}
-                                        </span>
+                                        <Badge key={s} variant="brandStrong">{s}</Badge>
                                     ))}
                                 </div>
                                 <div className="text-right flex-shrink-0 pl-3">

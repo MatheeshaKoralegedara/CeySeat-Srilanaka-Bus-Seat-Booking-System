@@ -53,11 +53,16 @@ export default function Home() {
     const { t } = useTranslation();
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');
+    const [searchError, setSearchError] = useState('');
     const navigate = useNavigate();
 
     function search(e) {
         e?.preventDefault();
-        if (!from || !to) return;
+        if (!from || !to) {
+            setSearchError('Please choose both a departure and destination town.');
+            return;
+        }
+        setSearchError('');
         navigate(`/schedules?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
     }
 
@@ -106,6 +111,11 @@ export default function Home() {
                     {t('home.search')}
                 </button>
             </form>
+            {searchError && (
+                <p role="alert" className="relative z-10 text-center text-sm text-red-100 bg-red-900/40 border border-red-400/30 rounded-lg px-4 py-2 max-w-2xl mx-auto mt-3">
+                    {searchError}
+                </p>
+            )}
 
             {/* Trust stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 mb-16 text-center">
@@ -125,7 +135,7 @@ export default function Home() {
                     {howItWorks.map((step, i) => (
                         <div key={step.title} className="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center hover:shadow-xl hover:shadow-brand-900/10 hover:-translate-y-1 hover:border-brand-200 dark:hover:border-brand-500 transition-all duration-300">
                             <div className="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
                                     {step.icon}
                                 </svg>
                             </div>
@@ -148,7 +158,8 @@ export default function Home() {
                         <button
                             key={`${r.from}-${r.to}`}
                             onClick={() => navigate(`/schedules?from=${r.from}&to=${r.to}`)}
-                            className="group relative h-64 rounded-2xl overflow-hidden text-left shadow-md shadow-brand-900/10 hover:shadow-2xl hover:shadow-brand-900/25 hover:-translate-y-1 transition-all duration-300"
+                            aria-label={`Book ${r.from} to ${r.to}`}
+                            className="group relative h-64 rounded-2xl overflow-hidden text-left shadow-md shadow-brand-900/10 hover:shadow-2xl hover:shadow-brand-900/25 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 transition-all duration-300"
                         >
                             <img
                                 src={`${destinationImages[r.to]}?w=600&q=75&auto=format&fit=crop`}

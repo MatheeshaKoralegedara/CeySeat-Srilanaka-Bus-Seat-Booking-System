@@ -21,6 +21,9 @@
   --color-accent-600: #b37f12;
   --color-accent-700: #8f640d;
 
+  --color-surface: #f8f7f5;
+  --color-surface-dark: #14181c;
+
   --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Poppins', 'Inter', system-ui, sans-serif;
 }
@@ -35,12 +38,12 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  background-color: #f8f7f5;
+  background-color: var(--color-surface);
   transition: background-color 0.2s ease;
 }
 
 .dark body {
-  background-color: #14181c;
+  background-color: var(--color-surface-dark);
 }
 
 h1, h2, h3, .font-display {

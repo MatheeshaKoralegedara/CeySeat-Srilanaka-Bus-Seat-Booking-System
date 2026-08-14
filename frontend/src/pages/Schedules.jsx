@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import TownAutocomplete from '../components/TownAutocomplete';
 import { SkeletonCard } from '../components/Skeleton';
+import Badge from '../components/Badge';
+import { LOW_SEATS_THRESHOLD } from '../constants';
 
 const busTypeLabels = {
     NORMAL: 'Normal',
@@ -124,6 +126,7 @@ export default function Schedules() {
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
+                            aria-label="Sort by"
                             className="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
                         >
                             <option value="departure">Earliest Departure</option>
@@ -142,7 +145,7 @@ export default function Schedules() {
                     >
                         <div className="flex items-center gap-4">
                             <div className="hidden sm:flex w-11 h-11 rounded-lg bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 items-center justify-center flex-shrink-0">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
@@ -152,9 +155,7 @@ export default function Schedules() {
                                         {s.routeId}
                                     </h2>
                                     {s.busType && (
-                                        <span className="text-xs font-semibold bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 px-2 py-0.5 rounded-full">
-                                            {busTypeLabels[s.busType] || s.busType}
-                                        </span>
+                                        <Badge>{busTypeLabels[s.busType] || s.busType}</Badge>
                                     )}
                                 </div>
                                 {(s.travelName || s.busModel) && (
@@ -167,7 +168,7 @@ export default function Schedules() {
                                     <span className="text-gray-400 dark:text-gray-500"> · {formatDuration(durationMs(s))}</span>
                                 </p>
                                 {typeof s.availableSeats === 'number' && (
-                                    <p className={`text-xs font-semibold mt-1 ${s.availableSeats <= 8 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                                    <p className={`text-xs font-semibold mt-1 ${s.availableSeats <= LOW_SEATS_THRESHOLD ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'}`}>
                                         {s.availableSeats > 0 ? `${s.availableSeats} seats left` : 'Fully booked'}
                                     </p>
                                 )}

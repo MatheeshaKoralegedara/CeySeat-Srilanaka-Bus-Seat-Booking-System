@@ -27,6 +27,7 @@ A backend + frontend system for booking bus seats across Sri Lanka, with real-ti
    - `PAYHERE_MERCHANT_SECRET`
 2. Run:
 
+cd backend
 ./mvnw spring-boot:run
 
 3. API docs available at `http://localhost:8080/swagger-ui.html`
@@ -62,7 +63,7 @@ Update `notify_url` in the frontend's payment request to match your ngrok URL.
 
 ## Project structure
 
-src/main/java/com/CeySeat/BusSeatBooking/
+backend/src/main/java/com/CeySeat/BusSeatBooking/
 ├── config/ — Security, JWT, CORS, rate limiting
 ├── controller/ — REST endpoints
 ├── dto/ — Request/response objects

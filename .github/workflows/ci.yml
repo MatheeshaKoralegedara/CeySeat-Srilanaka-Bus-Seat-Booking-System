@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +22,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Make mvnw executable
-        run: chmod +x ./mvnw    
+        run: chmod +x ./mvnw
 
       - name: Build and test
         run: ./mvnw clean verify

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -28,7 +28,7 @@ public class ReservationExpiryJob {
     @Scheduled(fixedRate = 60_000)
     public void expireStaleReservations() {
         List<Booking> expired = bookingRepository
-                .findByStatusAndReservedUntilBefore(BookingStatus.RESERVED, LocalDateTime.now());
+                .findByStatusAndReservedUntilBefore(BookingStatus.RESERVED, Instant.now());
 
         if (expired.isEmpty()) return;
 

@@ -4,7 +4,7 @@ import com.CeySeat.BusSeatBooking.model.BookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
@@ -14,7 +14,7 @@ public class BookingResponse {
     private String groupBookingId;
     private String seatNo;
     private BookingStatus status;
-    private LocalDateTime reservedUntil;
+    private Instant reservedUntil;
     private double fare;
     private String passengerGender;
 }

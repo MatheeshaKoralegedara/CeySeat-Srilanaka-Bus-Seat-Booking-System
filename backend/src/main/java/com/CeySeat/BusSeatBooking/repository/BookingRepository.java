@@ -4,7 +4,7 @@ import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public interface BookingRepository extends MongoRepository<Booking, String> {

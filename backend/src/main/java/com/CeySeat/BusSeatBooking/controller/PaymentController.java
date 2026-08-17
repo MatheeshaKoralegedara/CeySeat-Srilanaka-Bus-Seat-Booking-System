@@ -1,12 +1,13 @@
 package com.CeySeat.BusSeatBooking.controller;
 
-
 import com.CeySeat.BusSeatBooking.dto.PaymentHashRequest;
 import com.CeySeat.BusSeatBooking.dto.PaymentHashResponse;
 import com.CeySeat.BusSeatBooking.exception.NotFoundException;
 import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
+import com.CeySeat.BusSeatBooking.model.User;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
+import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import com.CeySeat.BusSeatBooking.service.PayHereService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class PaymentController {
 
     private final PayHereService payHereService;
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
 
     @PostMapping("/hash")
     public ResponseEntity<PaymentHashResponse> generateHash(@Valid @RequestBody PaymentHashRequest request,
@@ -34,7 +36,6 @@ public class PaymentController {
             throw new NotFoundException("Booking not found: " + request.getGroupBookingId());
         }
 
-        // Ownership check — you can only pay for your own bookings
         boolean allOwnedByCaller = bookings.stream().allMatch(b -> b.getUserId().equals(principal.getName()));
         if (!allOwnedByCaller) {
             throw new SecurityException("You do not own this booking.");
@@ -44,6 +45,9 @@ public class PaymentController {
         if (!allReserved) {
             throw new IllegalStateException("This reservation is no longer payable — it may have expired or already been paid.");
         }
+
+        User user = userRepository.findById(principal.getName())
+                .orElseThrow(() -> new NotFoundException("User not found: " + principal.getName()));
 
         double total = bookings.stream().mapToDouble(Booking::getFare).sum();
         String formattedAmount = String.format("%.2f", total);
@@ -59,7 +63,9 @@ public class PaymentController {
                 hash,
                 payHereService.getNotifyUrl(),
                 seatNumbers,
-                bookings.get(0).getReservedUntil()
+                bookings.get(0).getReservedUntil(),
+                user.getEmail(),
+                user.getPhone()
         ));
     }
 }

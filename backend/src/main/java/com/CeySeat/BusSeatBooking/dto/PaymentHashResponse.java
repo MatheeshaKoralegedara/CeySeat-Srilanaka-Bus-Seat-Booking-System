@@ -17,4 +17,6 @@ public class PaymentHashResponse {
     private String notifyUrl;
     private List<String> seatNumbers;
     private Instant reservedUntil;
+    private String buyerEmail;
+    private String buyerPhone;
 }

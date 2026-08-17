@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @Document(collection = "bookings")
@@ -36,7 +36,7 @@ public class Booking {
 
     private BookingStatus status;
 
-    private LocalDateTime reservedUntil; // hold expiry, only relevant while status=RESERVED
+    private Instant reservedUntil; // hold expiry, only relevant while status=RESERVED
     private String paymentReference;
     private double fare;
     private String passengerGender;

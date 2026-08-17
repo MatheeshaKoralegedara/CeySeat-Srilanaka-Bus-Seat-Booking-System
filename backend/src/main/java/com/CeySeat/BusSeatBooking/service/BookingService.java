@@ -13,7 +13,7 @@ import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +61,7 @@ public class BookingService {
             booking.setSeatNo(seatNo);
             booking.setGroupBookingId(groupId);
             booking.setStatus(BookingStatus.RESERVED);
-            booking.setReservedUntil(LocalDateTime.now().plusMinutes(HOLD_MINUTES));
+            booking.setReservedUntil(LocalDateTime.now().plusMinutes(HOLD_MINUTES * 60L));
             booking.setFare(schedule.getFare());
             booking.setPassengerGender(gender);
 

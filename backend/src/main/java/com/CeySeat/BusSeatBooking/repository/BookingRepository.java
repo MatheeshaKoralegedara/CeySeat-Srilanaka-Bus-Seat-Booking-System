@@ -12,7 +12,7 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
 
     List<Booking> findByGroupBookingId(String groupBookingId);
 
-    List<Booking> findByStatusAndReservedUntilBefore(BookingStatus status, LocalDateTime cutoff);
+    List<Booking> findByStatusAndReservedUntilBefore(BookingStatus status, Instant cutoff);
 
     List<Booking> findByUserIdOrderByReservedUntilDesc(String userId);
 }

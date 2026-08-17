@@ -5,6 +5,7 @@ import client from '../api/client';
 import TownAutocomplete from '../components/TownAutocomplete';
 import { SkeletonCard } from '../components/Skeleton';
 import Badge from '../components/Badge';
+import DetailsModal from '../components/DetailsModal';
 import { LOW_SEATS_THRESHOLD } from '../constants';
 
 const busTypeLabels = {
@@ -22,6 +23,7 @@ export default function Schedules() {
     const [schedules, setSchedules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [sortBy, setSortBy] = useState('departure');
+    const [timetableSchedule, setTimetableSchedule] = useState(null);
     const navigate = useNavigate();
 
     function search() {
@@ -47,6 +49,18 @@ export default function Schedules() {
     function formatDate(dateStr) {
         return new Date(dateStr).toLocaleString('en-US', {
             weekday: 'short', month: 'short', day: 'numeric',
+            hour: 'numeric', minute: '2-digit',
+        });
+    }
+
+    function formatDateOnly(dateStr) {
+        return new Date(dateStr).toLocaleString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric',
+        });
+    }
+
+    function formatTime(dateStr) {
+        return new Date(dateStr).toLocaleString('en-US', {
             hour: 'numeric', minute: '2-digit',
         });
     }
@@ -138,58 +152,129 @@ export default function Schedules() {
             )}
 
             <div className="grid gap-4">
-                {sortedSchedules.map((s) => (
-                    <div
-                        key={s.id}
-                        className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between hover:shadow-lg hover:shadow-brand-900/5 hover:border-brand-200 dark:hover:border-brand-500 transition-all"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="hidden sm:flex w-11 h-11 rounded-lg bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 items-center justify-center flex-shrink-0">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-gray-100">
-                                        {s.routeId}
-                                    </h2>
-                                    {s.busType && (
-                                        <Badge>{busTypeLabels[s.busType] || s.busType}</Badge>
-                                    )}
-                                </div>
-                                {(s.travelName || s.busModel) && (
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                                        {s.travelName}{s.travelName && s.busModel ? ' · ' : ''}{s.busModel}
-                                    </p>
-                                )}
-                                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                                    {formatDate(s.departureTime)} → {formatDate(s.arrivalTime)}
-                                    <span className="text-gray-400 dark:text-gray-500"> · {formatDuration(durationMs(s))}</span>
-                                </p>
-                                {typeof s.availableSeats === 'number' && (
-                                    <p className={`text-xs font-semibold mt-1 ${s.availableSeats <= LOW_SEATS_THRESHOLD ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                                        {s.availableSeats > 0 ? `${s.availableSeats} seats left` : 'Fully booked'}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                {sortedSchedules.map((s) => {
+                    const [routeFrom, routeTo] = s.routeId.split('-');
+                    const soldOut = s.availableSeats === 0;
+                    const lowSeats = s.availableSeats > 0 && s.availableSeats <= LOW_SEATS_THRESHOLD;
+                    const sameDay = new Date(s.departureTime).toDateString() === new Date(s.arrivalTime).toDateString();
 
-                        <div className="text-right flex flex-col items-end gap-2">
-                            <span className="text-2xl font-bold text-brand-700 dark:text-brand-300">
-                                Rs. {s.fare}
-                            </span>
-                            <button
-                                onClick={() => navigate(`/seats/${s.id}`)}
-                                disabled={s.availableSeats === 0}
-                                className="bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-brand-900 font-semibold px-5 py-2 rounded-lg transition-colors shadow-sm shadow-accent-600/20 disabled:shadow-none"
-                            >
-                                {s.availableSeats === 0 ? 'Sold Out' : t('schedules.selectSeats')}
-                            </button>
+                    return (
+                        <div
+                            key={s.id}
+                            className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:shadow-brand-900/5 hover:border-brand-200 dark:hover:border-brand-500 transition-all"
+                        >
+                            <div className="p-5">
+                                {/* Full-width header: route + tags */}
+                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                    <h2 className="font-display text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+                                        {routeFrom} <span className="text-gray-400 dark:text-gray-500 font-normal">→</span> {routeTo}
+                                    </h2>
+                                </div>
+                                {(s.travelName || s.busType) && (
+                                    <div className="flex items-center gap-2 flex-wrap mb-4">
+                                        {s.travelName && <Badge variant="orange">{s.travelName.toUpperCase()}</Badge>}
+                                        {s.busType && <Badge variant="brand">{busTypeLabels[s.busType] || s.busType}</Badge>}
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col lg:flex-row lg:items-stretch gap-5">
+                                {/* Time strip */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50/50 dark:bg-gray-900/20 h-full">
+                                        <div className="px-3 sm:px-4 py-3 min-w-0">
+                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Departure</p>
+                                            <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5 truncate">{formatDateOnly(s.departureTime)}</p>
+                                            <p className="font-display text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tabular-nums">
+                                                {formatTime(s.departureTime)}
+                                            </p>
+                                        </div>
+                                        <div className="px-2 sm:px-4 py-3 flex flex-col items-center justify-center text-center">
+                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Duration</p>
+                                            <div className="flex items-center gap-1 text-brand-600 dark:text-brand-300 font-bold text-xs sm:text-sm whitespace-nowrap">
+                                                <span>{formatDuration(durationMs(s))}</span>
+                                                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div className="px-3 sm:px-4 py-3 min-w-0 text-right">
+                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Arrival</p>
+                                            <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5 truncate">
+                                                {sameDay ? 'Same day' : formatDateOnly(s.arrivalTime)}
+                                            </p>
+                                            <p className="font-display text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tabular-nums">
+                                                {formatTime(s.arrivalTime)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="hidden lg:block w-px bg-gray-100 dark:bg-gray-700"></div>
+
+                                {/* Seats, price, actions */}
+                                <div className="flex flex-col gap-3 w-full lg:w-auto lg:flex-shrink-0 lg:justify-center">
+                                    <div className="flex items-center justify-between lg:flex-col lg:items-end lg:gap-1.5">
+                                        {typeof s.availableSeats === 'number' ? (
+                                            <p className={`flex items-center gap-1.5 text-sm ${lowSeats ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-6.13a4 4 0 11-4 0 4 4 0 014 0zm6 2a4 4 0 11-2.83-3.83" />
+                                                </svg>
+                                                {soldOut ? (
+                                                    'Fully booked'
+                                                ) : (
+                                                    <>
+                                                        Available <span className="font-bold text-gray-900 dark:text-gray-100">{s.availableSeats}</span>
+                                                        {typeof s.totalSeats === 'number' && <span> / {s.totalSeats}</span>}
+                                                    </>
+                                                )}
+                                            </p>
+                                        ) : <span />}
+                                        <span className="text-xl sm:text-2xl font-bold text-brand-700 dark:text-brand-300">
+                                            Rs. {s.fare}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 w-full">
+                                        <button
+                                            onClick={() => navigate(`/seats/${s.id}`)}
+                                            disabled={soldOut}
+                                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-brand-900 font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm shadow-accent-600/20 disabled:shadow-none whitespace-nowrap"
+                                        >
+                                            {soldOut ? 'Sold Out' : t('schedules.selectSeats')}
+                                        </button>
+                                        <button
+                                            onClick={() => setTimetableSchedule(s)}
+                                            aria-label="View timetable details"
+                                            className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold px-3.5 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors whitespace-nowrap"
+                                        >
+                                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            </svg>
+                                            <span className="hidden sm:inline">Timetable</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
+
+            <DetailsModal
+                open={!!timetableSchedule}
+                onClose={() => setTimetableSchedule(null)}
+                title={timetableSchedule ? timetableSchedule.routeId.replace('-', ' → ') : ''}
+                rows={timetableSchedule ? [
+                    { label: 'Operator', value: timetableSchedule.travelName },
+                    { label: 'Bus', value: timetableSchedule.busModel },
+                    { label: 'Type', value: busTypeLabels[timetableSchedule.busType] || timetableSchedule.busType },
+                    { label: 'Departure', value: formatDate(timetableSchedule.departureTime) },
+                    { label: 'Arrival', value: formatDate(timetableSchedule.arrivalTime) },
+                    { label: 'Duration', value: formatDuration(durationMs(timetableSchedule)) },
+                    { label: 'Fare', value: `Rs. ${timetableSchedule.fare}` },
+                    { label: 'Contact', value: timetableSchedule.contactNumber },
+                ] : []}
+            />
         </div>
     );
 }

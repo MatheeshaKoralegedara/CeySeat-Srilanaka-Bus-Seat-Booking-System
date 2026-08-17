@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -15,6 +15,23 @@ export default function Layout({ children }) {
     const location = useLocation();
     const { t, i18n } = useTranslation();
     const [menuOpen, setMenuOpen] = useState(false);
+    const isHome = location.pathname === '/';
+    const [scrolled, setScrolled] = useState(!isHome);
+
+    useEffect(() => {
+        if (!isHome) {
+            setScrolled(true);
+            return undefined;
+        }
+        function onScroll() {
+            setScrolled(window.scrollY > 40);
+        }
+        onScroll();
+        window.addEventListener('scroll', onScroll);
+        return () => window.removeEventListener('scroll', onScroll);
+    }, [isHome]);
+
+    const transparentHeader = isHome && !scrolled;
 
     function handleLogout() {
         logout();
@@ -30,12 +47,20 @@ export default function Layout({ children }) {
     return (
         <div className="min-h-screen bg-surface dark:bg-surface-dark flex flex-col">
             <RouteTransition />
-            <header className="relative overflow-hidden bg-brand-700 text-white shadow-lg shadow-brand-900/10 sticky top-0 z-30 border-b border-brand-800/50">
+            <header
+                className={`overflow-hidden text-white transition-colors duration-300 z-40 border-b ${
+                    isHome ? 'fixed top-0 left-0 right-0' : 'sticky top-0'
+                } ${
+                    transparentHeader
+                        ? 'bg-black/25 backdrop-blur-sm border-transparent shadow-none'
+                        : 'bg-brand-700 shadow-lg shadow-brand-900/10 border-brand-800/50'
+                }`}
+            >
                 <FestiveOverlay />
                 <div className="relative z-10 max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link to="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
-                            <img src={logo} alt="CeySeat" className="h-14 md:h-20 w-auto" />
+                            <img src={logo} alt="CeySeat" className={`h-16 md:h-24 w-auto ${transparentHeader ? 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]' : ''}`} />
                         </Link>
                     </div>
 
@@ -222,7 +247,10 @@ export default function Layout({ children }) {
                 )}
             </header>
 
-            <main key={location.pathname} className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 fade-in">
+            <main
+                key={location.pathname}
+                className={`flex-1 w-full fade-in ${isHome ? '' : 'max-w-6xl mx-auto px-4 py-8'}`}
+            >
                 {children}
             </main>
 

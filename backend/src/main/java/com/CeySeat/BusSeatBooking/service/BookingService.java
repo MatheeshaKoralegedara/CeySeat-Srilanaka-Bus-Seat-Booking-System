@@ -61,7 +61,7 @@ public class BookingService {
             booking.setSeatNo(seatNo);
             booking.setGroupBookingId(groupId);
             booking.setStatus(BookingStatus.RESERVED);
-            booking.setReservedUntil(LocalDateTime.now().plusMinutes(HOLD_MINUTES * 60L));
+            booking.setReservedUntil(Instant.now().plusSeconds(HOLD_MINUTES * 60L));
             booking.setFare(schedule.getFare());
             booking.setPassengerGender(gender);
 

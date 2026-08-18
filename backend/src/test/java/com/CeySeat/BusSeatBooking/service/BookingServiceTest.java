@@ -2,9 +2,12 @@ package com.CeySeat.BusSeatBooking.service;
 
 import com.CeySeat.BusSeatBooking.dto.ReserveSeatsRequest;
 import com.CeySeat.BusSeatBooking.model.Booking;
+import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
 import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
+import com.CeySeat.BusSeatBooking.model.Seat;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
+import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +33,9 @@ class BookingServiceTest {
     @Mock
     private ScheduleRepository scheduleRepository;
 
+    @Mock
+    private BusRepository busRepository;
+
     @InjectMocks
     private BookingService bookingService;
 
@@ -40,10 +47,19 @@ class BookingServiceTest {
         request.setPassengerGenders(Map.of("A1", "MALE"));
 
         Schedule schedule = new Schedule();
+        schedule.setBusId("bus-1");
         schedule.setFare(42.5);
         schedule.setStatus(ScheduleStatus.APPROVED);
+        schedule.setDepartureTime(LocalDateTime.now().plusHours(2));
+
+        Seat seat = new Seat();
+        seat.setSeatNo("A1");
+        seat.setBookable(true);
+        Bus bus = new Bus();
+        bus.setSeatLayout(List.of(seat));
 
         when(scheduleRepository.findById("schedule-1")).thenReturn(Optional.of(schedule));
+        when(busRepository.findById("bus-1")).thenReturn(Optional.of(bus));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking booking = invocation.getArgument(0);
             booking.setId("booking-1");

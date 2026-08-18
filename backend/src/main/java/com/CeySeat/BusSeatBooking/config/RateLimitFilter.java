@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,7 +30,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 || path.equals("/api/payments/hash");
 
         if (limited) {
-            String key = request.getRemoteAddr() + ":" + path;
+            // Runs after JwtAuthFilter, so the authenticated principal is
+            // available here — key on the passenger's user id rather than
+            // request.getRemoteAddr(), which is just the proxy/load balancer
+            // in front of any real deployment and would be shared by every
+            // passenger at once.
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String subject = (authentication != null && authentication.isAuthenticated()
+                    && !"anonymousUser".equals(authentication.getPrincipal()))
+                    ? authentication.getName()
+                    : request.getRemoteAddr();
+            String key = subject + ":" + path;
             Bucket bucket = buckets.computeIfAbsent(key, k -> Bucket.builder()
                     .addLimit(Bandwidth.simple(10, Duration.ofMinutes(1))) // 10 requests/min per IP per endpoint
                     .build());

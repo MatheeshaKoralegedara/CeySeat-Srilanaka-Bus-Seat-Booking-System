@@ -53,8 +53,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             .requestMatchers(HttpMethod.DELETE, "/api/buses/**", "/api/schedules/**").hasAnyRole("OPERATOR", "ADMIN")
             .anyRequest().authenticated()
         )
-        .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(rateLimitFilter, JwtAuthFilter.class);
 
     return http.build();
 }

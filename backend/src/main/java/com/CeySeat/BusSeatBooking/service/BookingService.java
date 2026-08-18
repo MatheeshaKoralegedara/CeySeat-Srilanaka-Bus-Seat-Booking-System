@@ -17,6 +17,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +46,10 @@ public class BookingService {
 
         if (schedule.getStatus() != ScheduleStatus.APPROVED) {
             throw new SeatUnavailableException("This schedule is not currently open for booking.");
+        }
+
+        if (!schedule.getDepartureTime().isAfter(LocalDateTime.now())) {
+            throw new SeatUnavailableException("This bus has already departed.");
         }
 
         Bus bus = busRepository.findById(schedule.getBusId())

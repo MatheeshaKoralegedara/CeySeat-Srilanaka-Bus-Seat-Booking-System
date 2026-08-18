@@ -19,4 +19,5 @@ public class PaymentHashResponse {
     private Instant reservedUntil;
     private String buyerEmail;
     private String buyerPhone;
+    private boolean sandbox;
 }

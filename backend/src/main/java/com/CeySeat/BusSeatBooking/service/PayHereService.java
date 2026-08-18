@@ -19,12 +19,19 @@ public class PayHereService {
     @Value("${payhere.notify-url}")
     private String notifyUrl;
 
+    @Value("${payhere.sandbox}")
+    private boolean sandbox;
+
     public String getMerchantId() {
         return merchantId;
     }
 
     public String getNotifyUrl() {
         return notifyUrl;
+    }
+
+    public boolean isSandbox() {
+        return sandbox;
     }
 
     public String generateHash(String orderId, double amount) {

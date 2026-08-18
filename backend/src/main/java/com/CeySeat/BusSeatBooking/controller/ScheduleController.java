@@ -95,6 +95,7 @@ public class ScheduleController {
 
     @PostMapping
     public ResponseEntity<Schedule> addSchedule(@RequestBody Schedule schedule, java.security.Principal principal) {
+        schedule.setId(null);
         Bus bus = busRepository.findById(schedule.getBusId())
                 .orElseThrow(() -> new NotFoundException("Bus not found: " + schedule.getBusId()));
 

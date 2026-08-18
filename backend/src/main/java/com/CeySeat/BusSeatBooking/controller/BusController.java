@@ -37,6 +37,7 @@ public class BusController {
 
     @PostMapping
     public Bus addBus(@RequestBody Bus bus, Principal principal) {
+        bus.setId(null);
         bus.setOperatorId(principal.getName());
         return busRepository.save(bus);
     }

@@ -3,6 +3,7 @@ package com.CeySeat.BusSeatBooking.controller;
 import com.CeySeat.BusSeatBooking.exception.NotFoundException;
 import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.repository.BusRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class BusController {
     }
 
     @PostMapping
-    public Bus addBus(@RequestBody Bus bus, Principal principal) {
+    public Bus addBus(@Valid @RequestBody Bus bus, Principal principal) {
         bus.setId(null);
         bus.setOperatorId(principal.getName());
         return busRepository.save(bus);
@@ -49,7 +50,7 @@ public class BusController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Bus> updateBus(@PathVariable String id, @RequestBody Bus updated, Authentication authentication) {
+    public ResponseEntity<Bus> updateBus(@PathVariable String id, @Valid @RequestBody Bus updated, Authentication authentication) {
         Bus bus = busRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Bus not found: " + id));
 

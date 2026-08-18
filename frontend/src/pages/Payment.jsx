@@ -48,7 +48,7 @@ export default function Payment() {
         client.post('/payments/hash', { groupBookingId })
             .then((res) => setHashData(res.data))
             .catch((err) => {
-                setLoadError(err.response?.data?.error || 'Could not load this booking for payment. It may have expired or already been paid.');
+                setLoadError(err.response?.data?.error || t('payment.loadErrorFallback'));
             });
     }, [groupBookingId]);
 
@@ -104,14 +104,14 @@ export default function Payment() {
             <StatusScreen
                 variant="error"
                 icon={<path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.008M12 3l9 16.5H3L12 3z" />}
-                title="Can't Load This Payment"
+                title={t('payment.loadErrorTitle')}
                 message={loadError}
                 action={
                     <Link
                         to="/bookings"
                         className="inline-block bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-sm"
                     >
-                        Back to My Bookings
+                        {t('payment.backToBookings')}
                     </Link>
                 }
             />
@@ -130,7 +130,8 @@ export default function Payment() {
         );
     }
 
-    const seatLabel = hashData.seatNumbers?.length > 1 ? 'Seats' : 'Seat';
+    const seatCount = hashData.seatNumbers?.length || 0;
+    const seatLabel = t('payment.seat', { count: seatCount || 1 });
 
     if (status === 'success') {
         const ticketId = groupBookingId.slice(-8).toUpperCase();
@@ -213,18 +214,18 @@ export default function Payment() {
             <StatusScreen
                 variant="error"
                 icon={<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />}
-                title={status === 'dismissed' ? 'Payment Cancelled' : 'Something Went Wrong'}
+                title={status === 'dismissed' ? t('payment.cancelledTitle') : t('payment.errorTitle')}
                 message={
                     status === 'dismissed'
-                        ? 'You closed the payment window before completing checkout.'
-                        : 'Your payment could not be processed. Please try again.'
+                        ? t('payment.cancelledMessage')
+                        : t('payment.errorMessage')
                 }
                 action={
                     <button
                         onClick={() => setStatus('idle')}
                         className="bg-accent-500 hover:bg-accent-600 text-brand-900 font-semibold px-6 py-3 rounded-lg transition-colors shadow-sm shadow-accent-600/25"
                     >
-                        Try Again
+                        {t('payment.tryAgain')}
                     </button>
                 }
             />
@@ -246,7 +247,7 @@ export default function Payment() {
                     <div className="flex flex-wrap justify-center gap-1.5 mb-5">
                         {hashData.seatNumbers.map((s) => (
                             <Badge key={s} variant="brandStrong">
-                                {seatLabel === 'Seats' ? `Seat ${s}` : s}
+                                {seatCount > 1 ? `${t('payment.seat', { count: 1 })} ${s}` : s}
                             </Badge>
                         ))}
                     </div>
@@ -261,11 +262,11 @@ export default function Payment() {
                             <circle cx="12" cy="12" r="9" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
                         </svg>
-                        Seats held for {String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}
+                        {t('payment.seatsHeld', { time: `${String(countdown.minutes).padStart(2, '0')}:${String(countdown.seconds).padStart(2, '0')}` })}
                     </Badge>
                 )}
                 {countdown && countdown.expired && (
-                    <Badge variant="red" className="mb-5">Your seat hold has expired</Badge>
+                    <Badge variant="red" className="mb-5">{t('payment.holdExpired')}</Badge>
                 )}
 
                 <button

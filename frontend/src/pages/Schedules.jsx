@@ -7,6 +7,7 @@ import { SkeletonCard } from '../components/Skeleton';
 import Badge from '../components/Badge';
 import DetailsModal from '../components/DetailsModal';
 import { LOW_SEATS_THRESHOLD } from '../constants';
+import { toBcp47Locale } from '../utils/localeDate';
 
 const busTypeLabels = {
     NORMAL: 'Normal',
@@ -15,7 +16,7 @@ const busTypeLabels = {
 };
 
 export default function Schedules() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [searchParams] = useSearchParams();
     const [from, setFrom] = useState(searchParams.get('from') || '');
     const [to, setTo] = useState(searchParams.get('to') || '');
@@ -46,21 +47,23 @@ export default function Schedules() {
 
     useEffect(() => { search(); }, []);
 
+    const locale = toBcp47Locale(i18n.language);
+
     function formatDate(dateStr) {
-        return new Date(dateStr).toLocaleString('en-US', {
+        return new Date(dateStr).toLocaleString(locale, {
             weekday: 'short', month: 'short', day: 'numeric',
             hour: 'numeric', minute: '2-digit',
         });
     }
 
     function formatDateOnly(dateStr) {
-        return new Date(dateStr).toLocaleString('en-US', {
+        return new Date(dateStr).toLocaleString(locale, {
             weekday: 'short', month: 'short', day: 'numeric',
         });
     }
 
     function formatTime(dateStr) {
-        return new Date(dateStr).toLocaleString('en-US', {
+        return new Date(dateStr).toLocaleString(locale, {
             hour: 'numeric', minute: '2-digit',
         });
     }
@@ -134,18 +137,18 @@ export default function Schedules() {
 
             {!loading && schedules.length > 0 && (
                 <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{schedules.length} bus{schedules.length > 1 ? 'es' : ''} found</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('schedules.busesFound', { count: schedules.length })}</p>
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 dark:text-gray-500 uppercase font-semibold hidden sm:inline">Sort by</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 uppercase font-semibold hidden sm:inline">{t('schedules.sortBy')}</span>
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            aria-label="Sort by"
+                            aria-label={t('schedules.sortBy')}
                             className="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
                         >
-                            <option value="departure">Earliest Departure</option>
-                            <option value="price">Lowest Price</option>
-                            <option value="duration">Shortest Duration</option>
+                            <option value="departure">{t('schedules.sortDeparture')}</option>
+                            <option value="price">{t('schedules.sortPrice')}</option>
+                            <option value="duration">{t('schedules.sortDuration')}</option>
                         </select>
                     </div>
                 </div>
@@ -182,14 +185,14 @@ export default function Schedules() {
                                 <div className="flex-1 min-w-0">
                                     <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50/50 dark:bg-gray-900/20 h-full">
                                         <div className="px-3 sm:px-4 py-3 min-w-0">
-                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Departure</p>
+                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('schedules.departureLabel')}</p>
                                             <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5 truncate">{formatDateOnly(s.departureTime)}</p>
                                             <p className="font-display text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tabular-nums">
                                                 {formatTime(s.departureTime)}
                                             </p>
                                         </div>
                                         <div className="px-2 sm:px-4 py-3 flex flex-col items-center justify-center text-center">
-                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Duration</p>
+                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('schedules.durationLabel')}</p>
                                             <div className="flex items-center gap-1 text-brand-600 dark:text-brand-300 font-bold text-xs sm:text-sm whitespace-nowrap">
                                                 <span>{formatDuration(durationMs(s))}</span>
                                                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden="true">
@@ -198,9 +201,9 @@ export default function Schedules() {
                                             </div>
                                         </div>
                                         <div className="px-3 sm:px-4 py-3 min-w-0 text-right">
-                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Arrival</p>
+                                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('schedules.arrivalLabel')}</p>
                                             <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5 truncate">
-                                                {sameDay ? 'Same day' : formatDateOnly(s.arrivalTime)}
+                                                {sameDay ? t('schedules.sameDay') : formatDateOnly(s.arrivalTime)}
                                             </p>
                                             <p className="font-display text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tabular-nums">
                                                 {formatTime(s.arrivalTime)}
@@ -220,10 +223,10 @@ export default function Schedules() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-6.13a4 4 0 11-4 0 4 4 0 014 0zm6 2a4 4 0 11-2.83-3.83" />
                                                 </svg>
                                                 {soldOut ? (
-                                                    'Fully booked'
+                                                    t('schedules.fullyBooked')
                                                 ) : (
                                                     <>
-                                                        Available <span className="font-bold text-gray-900 dark:text-gray-100">{s.availableSeats}</span>
+                                                        {t('schedules.availableSeats')} <span className="font-bold text-gray-900 dark:text-gray-100">{s.availableSeats}</span>
                                                         {typeof s.totalSeats === 'number' && <span> / {s.totalSeats}</span>}
                                                     </>
                                                 )}
@@ -239,17 +242,17 @@ export default function Schedules() {
                                             disabled={soldOut}
                                             className="flex-1 inline-flex items-center justify-center gap-1.5 bg-accent-500 hover:bg-accent-600 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-brand-900 font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm shadow-accent-600/20 disabled:shadow-none whitespace-nowrap"
                                         >
-                                            {soldOut ? 'Sold Out' : t('schedules.selectSeats')}
+                                            {soldOut ? t('schedules.soldOut') : t('schedules.selectSeats')}
                                         </button>
                                         <button
                                             onClick={() => setTimetableSchedule(s)}
-                                            aria-label="View timetable details"
+                                            aria-label={t('schedules.viewTimetableAria')}
                                             className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold px-3.5 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors whitespace-nowrap"
                                         >
                                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                             </svg>
-                                            <span className="hidden sm:inline">Timetable</span>
+                                            <span className="hidden sm:inline">{t('schedules.timetable')}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -265,14 +268,14 @@ export default function Schedules() {
                 onClose={() => setTimetableSchedule(null)}
                 title={timetableSchedule ? timetableSchedule.routeId.replace('-', ' → ') : ''}
                 rows={timetableSchedule ? [
-                    { label: 'Operator', value: timetableSchedule.travelName },
-                    { label: 'Bus', value: timetableSchedule.busModel },
-                    { label: 'Type', value: busTypeLabels[timetableSchedule.busType] || timetableSchedule.busType },
-                    { label: 'Departure', value: formatDate(timetableSchedule.departureTime) },
-                    { label: 'Arrival', value: formatDate(timetableSchedule.arrivalTime) },
-                    { label: 'Duration', value: formatDuration(durationMs(timetableSchedule)) },
-                    { label: 'Fare', value: `Rs. ${timetableSchedule.fare}` },
-                    { label: 'Contact', value: timetableSchedule.contactNumber },
+                    { label: t('schedules.operator'), value: timetableSchedule.travelName },
+                    { label: t('schedules.bus'), value: timetableSchedule.busModel },
+                    { label: t('schedules.type'), value: busTypeLabels[timetableSchedule.busType] || timetableSchedule.busType },
+                    { label: t('schedules.departureLabel'), value: formatDate(timetableSchedule.departureTime) },
+                    { label: t('schedules.arrivalLabel'), value: formatDate(timetableSchedule.arrivalTime) },
+                    { label: t('schedules.durationLabel'), value: formatDuration(durationMs(timetableSchedule)) },
+                    { label: t('schedules.fare'), value: `Rs. ${timetableSchedule.fare}` },
+                    { label: t('schedules.contact'), value: timetableSchedule.contactNumber },
                 ] : []}
             />
         </div>

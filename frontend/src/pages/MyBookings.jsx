@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import { SkeletonBlock, SkeletonCard } from '../components/Skeleton';
+import { toBcp47Locale } from '../utils/localeDate';
 
 const statusStyles = {
     PAID: 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400',
     RESERVED: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400',
     EXPIRED: 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400',
     CANCELLED: 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400',
+};
+
+const statusKeys = {
+    PAID: 'myBookings.statusPaid',
+    RESERVED: 'myBookings.statusReserved',
+    EXPIRED: 'myBookings.statusExpired',
+    CANCELLED: 'myBookings.statusCancelled',
 };
 
 function groupBookings(bookings) {
@@ -27,8 +36,10 @@ function groupBookings(bookings) {
 }
 
 export default function MyBookings() {
+    const { t, i18n } = useTranslation();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const locale = toBcp47Locale(i18n.language);
 
     useEffect(() => {
         client.get('/bookings/my')
@@ -55,7 +66,7 @@ export default function MyBookings() {
 
     return (
         <div>
-            <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">My Bookings</h1>
+            <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">{t('myBookings.title')}</h1>
 
             {groups.length === 0 && (
                 <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -64,12 +75,12 @@ export default function MyBookings() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">You haven't booked any trips yet.</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">{t('myBookings.empty')}</p>
                     <Link
                         to="/schedules"
                         className="inline-block bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-sm"
                     >
-                        Browse Buses
+                        {t('myBookings.browseBuses')}
                     </Link>
                 </div>
             )}
@@ -98,10 +109,10 @@ export default function MyBookings() {
                             </div>
                             <div className="min-w-0">
                                 <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                    {g.seats.length > 1 ? `${g.seats.length} seats` : 'Seat'} {g.seats.length === 1 ? g.seats[0] : `(${g.seats.join(', ')})`}
+                                    {g.seats.length > 1 ? `${g.seats.length} ${t('myBookings.seat', { count: g.seats.length })}` : t('myBookings.seat', { count: 1 })} {g.seats.length === 1 ? g.seats[0] : `(${g.seats.join(', ')})`}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {g.reservedUntil && new Date(g.reservedUntil).toLocaleDateString('en-US', {
+                                    {g.reservedUntil && new Date(g.reservedUntil).toLocaleDateString(locale, {
                                         month: 'short', day: 'numeric', year: 'numeric',
                                     })}
                                 </p>
@@ -111,14 +122,14 @@ export default function MyBookings() {
                         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                             <span className="font-bold text-brand-700 dark:text-brand-300">Rs. {g.totalFare}</span>
                             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyles[g.status] || 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
-                                {g.status}
+                                {statusKeys[g.status] ? t(statusKeys[g.status]) : g.status}
                             </span>
                             {g.status === 'RESERVED' && (
                                 <Link
                                     to={`/payment/${g.groupBookingId}`}
                                     className="text-sm text-accent-600 dark:text-accent-400 font-semibold hover:underline"
                                 >
-                                    Pay Now
+                                    {t('myBookings.payNow')}
                                 </Link>
                             )}
                         </div>

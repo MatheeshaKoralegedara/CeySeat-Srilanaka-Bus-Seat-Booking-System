@@ -6,16 +6,21 @@ import com.CeySeat.BusSeatBooking.exception.NotFoundException;
 import com.CeySeat.BusSeatBooking.exception.SeatUnavailableException;
 import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
+import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
+import com.CeySeat.BusSeatBooking.model.Seat;
 import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
+import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,10 +31,13 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
+    private final BusRepository busRepository;
 
-    public BookingService(BookingRepository bookingRepository, ScheduleRepository scheduleRepository) {
+    public BookingService(BookingRepository bookingRepository, ScheduleRepository scheduleRepository,
+                           BusRepository busRepository) {
         this.bookingRepository = bookingRepository;
         this.scheduleRepository = scheduleRepository;
+        this.busRepository = busRepository;
     }
 
     public List<BookingResponse> reserveSeats(ReserveSeatsRequest request, String userId) {
@@ -38,6 +46,24 @@ public class BookingService {
 
         if (schedule.getStatus() != ScheduleStatus.APPROVED) {
             throw new SeatUnavailableException("This schedule is not currently open for booking.");
+        }
+
+        if (!schedule.getDepartureTime().isAfter(LocalDateTime.now())) {
+            throw new SeatUnavailableException("This bus has already departed.");
+        }
+
+        Bus bus = busRepository.findById(schedule.getBusId())
+                .orElseThrow(() -> new NotFoundException("Bus not found: " + schedule.getBusId()));
+
+        Set<String> validSeatNumbers = bus.getSeatLayout() == null ? Set.of() : bus.getSeatLayout().stream()
+                .filter(Seat::isBookable)
+                .map(Seat::getSeatNo)
+                .collect(Collectors.toSet());
+
+        for (String seatNo : request.getSeatNumbers()) {
+            if (!validSeatNumbers.contains(seatNo)) {
+                throw new SeatUnavailableException("Seat " + seatNo + " does not exist on this bus.");
+            }
         }
 
         String groupId = UUID.randomUUID().toString();

@@ -10,6 +10,7 @@ import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -94,7 +95,8 @@ public class ScheduleController {
     }
 
     @PostMapping
-    public ResponseEntity<Schedule> addSchedule(@RequestBody Schedule schedule, java.security.Principal principal) {
+    public ResponseEntity<Schedule> addSchedule(@Valid @RequestBody Schedule schedule, java.security.Principal principal) {
+        schedule.setId(null);
         Bus bus = busRepository.findById(schedule.getBusId())
                 .orElseThrow(() -> new NotFoundException("Bus not found: " + schedule.getBusId()));
 
@@ -110,7 +112,7 @@ public class ScheduleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Schedule> updateSchedule(@PathVariable String id, @RequestBody Schedule updated,
+    public ResponseEntity<Schedule> updateSchedule(@PathVariable String id, @Valid @RequestBody Schedule updated,
                                                     Authentication authentication) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Schedule not found: " + id));

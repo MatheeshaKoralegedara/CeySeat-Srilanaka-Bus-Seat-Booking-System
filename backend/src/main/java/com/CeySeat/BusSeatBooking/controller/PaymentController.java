@@ -65,7 +65,8 @@ public class PaymentController {
                 seatNumbers,
                 bookings.get(0).getReservedUntil(),
                 user.getEmail(),
-                user.getPhone()
+                user.getPhone(),
+                payHereService.isSandbox()
         ));
     }
 }

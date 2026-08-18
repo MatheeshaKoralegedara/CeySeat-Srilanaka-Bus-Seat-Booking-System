@@ -13,4 +13,17 @@ client.interceptors.request.use(
         return config;
     });
 
-    export default client;
+client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('ceyseat_token');
+            localStorage.removeItem('ceyseat_user');
+            if (window.location.pathname !== '/login') {
+                window.location.assign('/login?sessionExpired=1');
+            }
+        }
+        return Promise.reject(error);
+    });
+
+export default client;

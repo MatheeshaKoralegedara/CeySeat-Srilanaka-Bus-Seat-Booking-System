@@ -115,3 +115,12 @@ h1, h2, h3, .font-display {
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
+
+@keyframes peraheraScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+.animate-perahera-scroll {
+    animation: peraheraScroll 90s linear infinite;
+}

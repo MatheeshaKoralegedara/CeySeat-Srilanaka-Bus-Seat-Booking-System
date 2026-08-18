@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TownAutocomplete from '../components/TownAutocomplete';
 import heroBanner from '../assets/home-hero.webp';
+import heroVideo from '../assets/hero-video.mp4';
 
 const destinationImages = {
     Kandy: 'https://images.unsplash.com/photo-1737008233483-20585f5fbc62',
@@ -70,12 +71,18 @@ export default function Home() {
         <div>
             {/* Hero — full-bleed, edge to edge, navbar overlays on top */}
             <div className="relative w-full min-h-[560px] md:min-h-[680px] flex items-center overflow-hidden">
-                <img
-                    src={heroBanner}
-                    alt="CeySeat — Discover Sri Lanka's Wonders"
-                    className="absolute inset-0 w-full h-full object-cover object-[center_50%]"
-                    loading="eager"
-                />
+                <video
+                    className="absolute inset-0 w-full h-full object-cover object-[center_35%]"
+                    poster={heroBanner}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    aria-label="CeySeat — Discover Sri Lanka's Wonders"
+                >
+                    <source src={heroVideo} type="video/mp4" />
+                </video>
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-900/75 via-brand-900/50 to-brand-900/40"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 via-transparent to-brand-900/50"></div>
 

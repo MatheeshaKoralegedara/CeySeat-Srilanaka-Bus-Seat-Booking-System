@@ -8,6 +8,13 @@ import elephant from '../assets/festive/elephant.png';
 
 export const festivals = [
     {
+        name: 'newyear',
+        start: '01-01',
+        end: '01-30',
+        icons: ['🎉', '🎆', '✨'],
+        message: '🎉 Happy New Year! Wishing you safe and happy travels in 2027.',
+    },
+    {
         name: 'avurudu',
         // Sinhala & Tamil New Year — mid April, adjust dates each year
         start: '04-11',
@@ -31,7 +38,7 @@ export const festivals = [
     {
         name: 'christmas',
         start: '12-20',
-        end: '12-26',
+        end: '12-30',
         icons: [ snowflake],
         isSnow: true, // special-case: real falling snow effect instead of floating icons
     },

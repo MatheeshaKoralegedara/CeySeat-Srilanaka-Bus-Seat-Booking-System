@@ -189,12 +189,12 @@ export default function AdminPanel() {
         <div>
             <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
 
-            <div className="flex gap-2 mb-8 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex gap-2 mb-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
                 {['stats', 'users', 'bookings', 'buses', 'schedules'].map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`px-4 py-2.5 font-medium text-sm capitalize border-b-2 transition-colors flex items-center gap-1.5 ${
+                        className={`px-4 py-2.5 font-medium text-sm capitalize border-b-2 transition-colors flex items-center gap-1.5 flex-shrink-0 ${
                             tab === t
                                 ? 'border-accent-500 text-brand-700 dark:text-brand-300'
                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -241,7 +241,7 @@ export default function AdminPanel() {
                             + Add User
                         </button>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-sm">
                         <table className="w-full text-sm">
                             <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-left">
                                 <tr>
@@ -283,7 +283,7 @@ export default function AdminPanel() {
             {tab === 'bookings' && (
                 <div className="grid gap-3">
                     {bookings.map((b) => (
-                        <div key={b.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between text-sm hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                        <div key={b.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap items-center justify-between gap-2 text-sm hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
                             <span className="font-mono text-gray-500 dark:text-gray-400">{b.id.slice(-8)}</span>
                             <span className="text-gray-900 dark:text-gray-100">Seat {b.seatNo}</span>
                             <span className="font-semibold text-gray-900 dark:text-gray-100">Rs. {b.fare}</span>
@@ -305,10 +305,10 @@ export default function AdminPanel() {
                         <p className="text-sm text-gray-400 dark:text-gray-500">No buses yet.</p>
                     )}
                     {buses.map((bus) => (
-                        <div key={bus.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between gap-4 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
-                            <div>
+                        <div key={bus.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap items-center justify-between gap-4 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                            <div className="min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <p className="font-semibold text-gray-900 dark:text-gray-100">{bus.travelName || bus.model}</p>
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{bus.travelName || bus.model}</p>
                                     {bus.busType && (
                                         <span className="text-xs font-semibold bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 px-2 py-0.5 rounded-full">
                                             {busTypeLabels[bus.busType] || bus.busType}
@@ -319,7 +319,7 @@ export default function AdminPanel() {
                                     </span>
                                 </div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">{bus.model} · {bus.totalSeats} seats</p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500">
+                                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
                                     Added by {bus.operatorName}{bus.operatorEmail ? ` (${bus.operatorEmail})` : ''}
                                 </p>
                             </div>
@@ -342,10 +342,10 @@ export default function AdminPanel() {
                         <p className="text-sm text-gray-400 dark:text-gray-500">No schedules yet.</p>
                     )}
                     {schedules.map((s) => (
-                        <div key={s.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between gap-4 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <p className="font-semibold text-gray-900 dark:text-gray-100">{s.routeId}</p>
+                        <div key={s.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap items-center justify-between gap-4 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{s.routeId}</p>
                                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${scheduleStatusStyles[s.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
                                         {s.status}
                                     </span>
@@ -397,7 +397,7 @@ export default function AdminPanel() {
                     <form
                         onSubmit={submitAddUser}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 scale-in"
+                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 scale-in max-h-[90vh] overflow-y-auto"
                     >
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="font-display text-lg font-bold text-gray-900 dark:text-gray-100">Add User</h2>

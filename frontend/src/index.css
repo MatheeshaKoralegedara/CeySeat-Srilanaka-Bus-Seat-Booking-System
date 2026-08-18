@@ -124,3 +124,51 @@ h1, h2, h3, .font-display {
 .animate-perahera-scroll {
     animation: peraheraScroll 90s linear infinite;
 }
+
+@keyframes fireworkLaunch {
+    0% { bottom: 0; opacity: 1; }
+    70% { opacity: 1; }
+    100% { bottom: var(--burst-height, 60%); opacity: 0; }
+}
+
+@keyframes fireworkBurst {
+    0%, 60% { transform: translate(0, 0) scale(0); opacity: 0; }
+    72% { transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4)) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+}
+
+.animate-firework-launch {
+    animation: fireworkLaunch var(--duration, 1.6s) ease-out infinite;
+}
+
+.animate-firework-burst {
+    animation: fireworkBurst var(--duration, 1.6s) ease-out infinite;
+}
+
+@keyframes messagePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
+.animate-message-pulse {
+    animation: messagePulse 1.8s ease-in-out infinite;
+}
+
+.navbar-motif {
+    background-image: url("./assets/bg2.jpg");
+    background-repeat: no-repeat;
+    background-size: 70% auto;
+    background-position: center -150px;
+}
+
+.app-bg {
+    background-image: linear-gradient(rgba(248, 247, 245, 0.93), rgba(248, 247, 245, 0.93)), url("./assets/bg1.jpg");
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+.dark .app-bg {
+    background-image: linear-gradient(rgba(20, 24, 28, 0.92), rgba(20, 24, 28, 0.92)), url("./assets/bg1.jpg");
+}

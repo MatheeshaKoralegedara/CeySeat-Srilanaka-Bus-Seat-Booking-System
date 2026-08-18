@@ -94,7 +94,7 @@ export default function TownAutocomplete({ value, onChange, placeholder, label }
                                 type="button"
                                 onClick={() => select(town)}
                                 onMouseEnter={() => setActiveIndex(i)}
-                                className={`w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 ${
+                                className={`w-full text-left px-4 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 ${
                                     i === activeIndex ? 'bg-brand-50 dark:bg-brand-900/40' : 'hover:bg-brand-50 dark:hover:bg-brand-900/40'
                                 }`}
                             >

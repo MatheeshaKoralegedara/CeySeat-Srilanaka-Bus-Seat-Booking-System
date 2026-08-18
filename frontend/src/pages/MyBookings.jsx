@@ -78,9 +78,9 @@ export default function MyBookings() {
                 {groups.map((g) => (
                     <div
                         key={g.groupBookingId}
-                        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between hover:shadow-md hover:border-brand-200 dark:hover:border-brand-500 transition-all"
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-wrap items-center justify-between gap-4 hover:shadow-md hover:border-brand-200 dark:hover:border-brand-500 transition-all"
                     >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
                             <div className="flex -space-x-2 flex-shrink-0">
                                 {g.seats.slice(0, 3).map((seatNo) => (
                                     <div
@@ -96,8 +96,8 @@ export default function MyBookings() {
                                     </div>
                                 )}
                             </div>
-                            <div>
-                                <p className="font-semibold text-gray-900 dark:text-gray-100">
+                            <div className="min-w-0">
+                                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                                     {g.seats.length > 1 ? `${g.seats.length} seats` : 'Seat'} {g.seats.length === 1 ? g.seats[0] : `(${g.seats.join(', ')})`}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -108,7 +108,7 @@ export default function MyBookings() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                             <span className="font-bold text-brand-700 dark:text-brand-300">Rs. {g.totalFare}</span>
                             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyles[g.status] || 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                                 {g.status}

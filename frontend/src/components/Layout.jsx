@@ -8,6 +8,8 @@ import logo from '../assets/CEYSEAT.png';
 import FestiveOverlay from './FestivalOverlay';
 import TimeGreeting from './TimeGreeting';
 import PeraheraMarquee from './PeraheraMarquee';
+import FestivalMessage from './FestivalMessage';
+import Fireworks from './Fireworks';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
@@ -46,7 +48,7 @@ export default function Layout({ children }) {
     }
 
     return (
-        <div className="min-h-screen bg-surface dark:bg-surface-dark flex flex-col">
+        <div className="min-h-screen app-bg flex flex-col">
             <RouteTransition />
             <header
                 className={`overflow-hidden text-white transition-colors duration-300 z-40 border-b ${
@@ -57,7 +59,9 @@ export default function Layout({ children }) {
                         : 'bg-brand-700 shadow-lg shadow-brand-900/10 border-brand-800/50'
                 }`}
             >
+               <div className="absolute inset-0 navbar-motif opacity-[0.05] pointer-events-none" aria-hidden="true" />
                <FestiveOverlay />
+               <Fireworks />
 
                 <div className="relative z-10 max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
                     
@@ -167,9 +171,10 @@ export default function Layout({ children }) {
                 </div>
 
                 <PeraheraMarquee />
+                <FestivalMessage />
 
                 {menuOpen && (
-                    <div className="md:hidden relative z-10 border-t border-white/10 bg-brand-700 px-4 py-4 flex flex-col gap-4 text-sm font-medium">
+                    <div className="md:hidden relative z-10 border-t border-white/10 bg-brand-700 px-4 py-4 flex flex-col gap-4 text-sm font-medium max-h-[calc(100svh-4rem)] overflow-y-auto">
                         <div className="flex items-center gap-3">
                             <select
                                 value={i18n.language}
@@ -257,11 +262,12 @@ export default function Layout({ children }) {
                 key={location.pathname}
                 className={`flex-1 w-full fade-in ${isHome ? '' : 'max-w-6xl mx-auto px-4 py-8'}`}
             >
+                
                 {children}
             </main>
                 
             <footer className="bg-brand-900 text-brand-200 py-8 mt-8">
-                <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                     <div className="flex items-center">
                         <img src={logo} alt="CeySeat" className="h-10 w-auto" />
                     </div>

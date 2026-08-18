@@ -272,14 +272,14 @@ export default function OperatorDashboard() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
                 <div>
                     <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100">My Fleet</h1>
                     <p className="text-gray-500 dark:text-gray-400">Manage your buses and schedules</p>
                 </div>
                 <button
                     onClick={() => (showForm ? cancelBusForm() : setShowForm(true))}
-                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm"
+                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm self-start sm:self-auto"
                 >
                     {showForm ? 'Cancel' : '+ Add Bus'}
                 </button>
@@ -361,7 +361,7 @@ export default function OperatorDashboard() {
                         </div>
 
                         {!editingBusId && (
-                            <div className="flex items-center gap-3 md:col-span-3">
+                            <div className="flex flex-wrap items-center gap-3 md:col-span-3">
                                 <input
                                     type="checkbox"
                                     id="rearBench"
@@ -570,10 +570,10 @@ export default function OperatorDashboard() {
 
             <div className="grid gap-3">
                 {schedules.map((s) => (
-                    <div key={s.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <p className="font-semibold text-gray-900 dark:text-gray-100">{s.routeId}</p>
+                    <div key={s.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{s.routeId}</p>
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${scheduleStatusStyles[s.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
                                     {s.status}
                                 </span>

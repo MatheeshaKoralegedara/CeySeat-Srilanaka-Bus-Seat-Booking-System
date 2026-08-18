@@ -19,7 +19,7 @@ export default function GenderModal({ open, seats, onConfirm, onCancel }) {
 
     return (
         <div className="fixed inset-0 bg-brand-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 scale-in">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 scale-in max-h-[90vh] overflow-y-auto">
                 <h2 className="font-display text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
                     {seats.length > 1 ? 'Select Gender per Seat' : (t('seats.selectGenderTitle') || 'Select Gender')}
                 </h2>

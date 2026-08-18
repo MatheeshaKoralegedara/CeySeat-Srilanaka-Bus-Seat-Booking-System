@@ -81,7 +81,7 @@ export default function Payment() {
         setStatus('processing');
         const [firstName, ...rest] = (user?.fullName || 'Guest').trim().split(' ');
         window.payhere.startPayment({
-            sandbox: true,
+            sandbox: hashData.sandbox,
             merchant_id: hashData.merchantId,
             notify_url: hashData.notifyUrl,
             order_id: hashData.orderId,

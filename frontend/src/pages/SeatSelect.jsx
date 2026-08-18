@@ -43,20 +43,26 @@ export default function SeatSelect() {
     const { user } = useAuth();
     const navigate = useNavigate();
 
+    async function refreshSeats() {
+        const seatsRes = await client.get(`/bookings/${scheduleId}/seats`);
+        const freshBooked = seatsRes.data.map((b) => b.seatNo);
+        setBookedSeats(freshBooked);
+        const genderMap = {};
+        seatsRes.data.forEach((b) => { genderMap[b.seatNo] = b.passengerGender; });
+        setSeatGenders(genderMap);
+        return freshBooked;
+    }
+
     useEffect(() => {
         async function load() {
             try {
                 const scheduleRes = await client.get(`/schedules/${scheduleId}`);
                 const busRes = await client.get(`/buses/${scheduleRes.data.busId}`);
-                const seatsRes = await client.get(`/bookings/${scheduleId}/seats`);
 
                 setSchedule(scheduleRes.data);
                 setBusInfo(busRes.data);
                 setSeatLayout(busRes.data.seatLayout || []);
-                setBookedSeats(seatsRes.data.map((b) => b.seatNo));
-                const genderMap = {};
-                seatsRes.data.forEach((b) => { genderMap[b.seatNo] = b.passengerGender; });
-                setSeatGenders(genderMap);
+                await refreshSeats();
             } catch (err) {
                 setError('Could not load seat map for this bus.');
             } finally {
@@ -64,7 +70,26 @@ export default function SeatSelect() {
             }
         }
         load();
+
+        // Other passengers can reserve seats at any time — poll so the map
+        // doesn't go stale while someone is deciding, and so a seat they
+        // picked doesn't silently become unavailable underneath them.
+        const interval = setInterval(() => {
+            refreshSeats().catch(() => {});
+        }, 10000);
+        return () => clearInterval(interval);
     }, [scheduleId]);
+
+    useEffect(() => {
+        setSelectedSeats((prev) => {
+            const stillFree = prev.filter((s) => !bookedSeats.includes(s));
+            if (stillFree.length !== prev.length) {
+                setError('One or more of your selected seats were just taken by another passenger. Please reselect.');
+            }
+            return stillFree;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bookedSeats]);
 
     function toggleSeat(seatNo) {
         setSelectedSeats((prev) => {
@@ -74,10 +99,23 @@ export default function SeatSelect() {
         });
     }
 
-    function handleReserveClick() {
+    async function handleReserveClick() {
         if (!user) {
             navigate('/login');
             return;
+        }
+        setError('');
+        try {
+            const freshBooked = await refreshSeats();
+            const stillFree = selectedSeats.filter((s) => !freshBooked.includes(s));
+            if (stillFree.length !== selectedSeats.length) {
+                setSelectedSeats(stillFree);
+                setError('One or more of your selected seats were just taken by another passenger. Please reselect.');
+                return;
+            }
+        } catch {
+            // If the recheck itself fails, fall through to the reserve
+            // attempt — the backend's unique index is still the real guard.
         }
         setShowGenderModal(true);
     }

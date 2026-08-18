@@ -7,6 +7,7 @@ import RouteTransition from './RouteTransition';
 import logo from '../assets/CEYSEAT.png';
 import FestiveOverlay from './FestivalOverlay';
 import TimeGreeting from './TimeGreeting';
+import PeraheraMarquee from './PeraheraMarquee';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
@@ -56,14 +57,17 @@ export default function Layout({ children }) {
                         : 'bg-brand-700 shadow-lg shadow-brand-900/10 border-brand-800/50'
                 }`}
             >
-                <FestiveOverlay />
+               <FestiveOverlay />
+
                 <div className="relative z-10 max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+                    
                     <div className="flex items-center gap-4">
+                        
                         <Link to="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
                             <img src={logo} alt="CeySeat" className={`h-16 md:h-24 w-auto ${transparentHeader ? 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]' : ''}`} />
                         </Link>
                     </div>
-
+                    
                     <nav className="hidden md:flex items-center gap-5 text-sm font-medium">
                         <select
                              value={i18n.language}
@@ -162,6 +166,8 @@ export default function Layout({ children }) {
                     </button>
                 </div>
 
+                <PeraheraMarquee />
+
                 {menuOpen && (
                     <div className="md:hidden relative z-10 border-t border-white/10 bg-brand-700 px-4 py-4 flex flex-col gap-4 text-sm font-medium">
                         <div className="flex items-center gap-3">
@@ -253,7 +259,7 @@ export default function Layout({ children }) {
             >
                 {children}
             </main>
-
+                
             <footer className="bg-brand-900 text-brand-200 py-8 mt-8">
                 <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center">

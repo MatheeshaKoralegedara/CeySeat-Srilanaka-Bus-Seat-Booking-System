@@ -1,5 +1,9 @@
 
 import snowflake from '../assets/festive/snowflake.png';
+import  fire from '../assets/festive/fire.png';
+import drumer from '../assets/festive/drumer.png';
+import dancer from '../assets/festive/dancer.png';
+import elephant from '../assets/festive/elephant.png';
 
 
 export const festivals = [
@@ -30,6 +34,14 @@ export const festivals = [
         end: '12-26',
         icons: [ snowflake],
         isSnow: true, // special-case: real falling snow effect instead of floating icons
+    },
+     {
+        name: 'perahera',
+        // Esala Perahera — typically late July to early August, shifts yearly (lunar calendar), adjust each year
+        start: '08-18',
+        end: '08-29',
+        icons: [fire, drumer, dancer, elephant],
+        isMarquee: true,
     },
 ];
 

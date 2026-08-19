@@ -81,7 +81,8 @@
     "selectGenderNote": "Please be mindful if the next seat is booked by a passenger of the opposite gender.",
     "male": "Male",
     "female": "Female",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Retry"
   },
   "payment": {
     "totalAmount": "Total amount",

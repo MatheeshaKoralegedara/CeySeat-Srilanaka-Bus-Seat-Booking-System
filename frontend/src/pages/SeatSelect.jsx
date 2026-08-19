@@ -38,6 +38,8 @@ export default function SeatSelect() {
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const [reloadKey, setReloadKey] = useState(0);
     const [reserving, setReserving] = useState(false);
     const [showGenderModal, setShowGenderModal] = useState(false);
     const { user } = useAuth();
@@ -55,6 +57,8 @@ export default function SeatSelect() {
 
     useEffect(() => {
         async function load() {
+            setLoading(true);
+            setLoadError('');
             try {
                 const scheduleRes = await client.get(`/schedules/${scheduleId}`);
                 const busRes = await client.get(`/buses/${scheduleRes.data.busId}`);
@@ -64,7 +68,10 @@ export default function SeatSelect() {
                 setSeatLayout(busRes.data.seatLayout || []);
                 await refreshSeats();
             } catch (err) {
-                setError('Could not load seat map for this bus.');
+                setLoadError(
+                    err.response?.data?.error
+                    || (err.request && !err.response ? 'Network error. Check your connection and try again.' : 'Could not load seat map for this bus.')
+                );
             } finally {
                 setLoading(false);
             }
@@ -78,7 +85,8 @@ export default function SeatSelect() {
             refreshSeats().catch(() => {});
         }, 10000);
         return () => clearInterval(interval);
-    }, [scheduleId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scheduleId, reloadKey]);
 
     useEffect(() => {
         setSelectedSeats((prev) => {
@@ -172,6 +180,20 @@ export default function SeatSelect() {
                         ))}
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    if (loadError) {
+        return (
+            <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto px-6">
+                <p className="text-red-600 dark:text-red-400 mb-4">{loadError}</p>
+                <button
+                    onClick={() => setReloadKey((k) => k + 1)}
+                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm"
+                >
+                    {t('seats.retry')}
+                </button>
             </div>
         );
     }

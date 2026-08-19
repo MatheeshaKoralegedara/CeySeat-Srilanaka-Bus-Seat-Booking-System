@@ -135,6 +135,9 @@
     "registerSubtitle": "Book bus seats across Sri Lanka",
     "fullName": "Full Name",
     "phone": "Phone",
+    "nic": "NIC Number",
+    "invalidPhone": "Enter a valid Sri Lankan mobile number, e.g. 07XXXXXXXX",
+    "invalidNic": "Enter a valid NIC number (old: 9 digits + V/X, new: 12 digits)",
     "minChars": "Minimum 8 characters",
     "creatingAccount": "Creating account...",
     "haveAccount": "Already have an account?"

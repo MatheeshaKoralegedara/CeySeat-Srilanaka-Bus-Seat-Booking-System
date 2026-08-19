@@ -130,7 +130,13 @@ export default function SeatSelect() {
                 seatNumbers: selectedSeats,
                 passengerGenders,
             });
-            navigate(`/payment/${res.data[0].groupBookingId}`);
+            // The hold clock starts the instant this reserve call succeeds,
+            // not when the payment page's own fetch resolves — hand the
+            // deadline over so the countdown can render immediately instead
+            // of leaving the passenger with no visible timer in between.
+            navigate(`/payment/${res.data[0].groupBookingId}`, {
+                state: { reservedUntil: res.data[0].reservedUntil },
+            });
         } catch (err) {
             setError(err.response?.data?.error || 'Could not reserve seat(s)');
             setReserving(false);

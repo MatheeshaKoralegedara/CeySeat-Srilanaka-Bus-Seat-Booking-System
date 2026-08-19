@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import { SkeletonBlock } from '../components/Skeleton';
@@ -36,11 +36,16 @@ export default function Payment() {
     const { t } = useTranslation();
     const { user } = useAuth();
     const { bookingId: groupBookingId } = useParams();
+    const location = useLocation();
     const [hashData, setHashData] = useState(null);
     const [loadError, setLoadError] = useState('');
     const [status, setStatus] = useState('idle'); // idle | processing | success | error | dismissed
 
-    const countdown = useCountdown(hashData?.reservedUntil);
+    // Prefer the deadline handed over from the reserve call (the hold clock's
+    // real source of truth) so the countdown can render before this page's
+    // own /payments/hash fetch resolves; hashData.reservedUntil takes over
+    // once loaded, e.g. after a page refresh where nav state is gone.
+    const countdown = useCountdown(hashData?.reservedUntil || location.state?.reservedUntil);
 
     useEffect(() => {
         setLoadError('');
@@ -122,6 +127,15 @@ export default function Payment() {
         return (
             <div className="max-w-md mx-auto">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+                    {countdown && !countdown.expired && (
+                        <Badge variant="orange" className="mb-5 gap-1.5">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
+                            </svg>
+                            {t('payment.seatsHeld', { time: `${String(countdown.minutes).padStart(2, '0')}:${String(countdown.seconds).padStart(2, '0')}` })}
+                        </Badge>
+                    )}
                     <SkeletonBlock className="h-4 w-24 mx-auto mb-2" />
                     <SkeletonBlock className="h-10 w-32 mx-auto mb-8" />
                     <SkeletonBlock className="h-14 w-full rounded-xl" />

@@ -10,9 +10,11 @@ import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
 import com.CeySeat.BusSeatBooking.model.Seat;
 import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
+import com.CeySeat.BusSeatBooking.model.User;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
+import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -33,15 +35,23 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
     private final BusRepository busRepository;
+    private final UserRepository userRepository;
 
     public BookingService(BookingRepository bookingRepository, ScheduleRepository scheduleRepository,
-                           BusRepository busRepository) {
+                           BusRepository busRepository, UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.scheduleRepository = scheduleRepository;
         this.busRepository = busRepository;
+        this.userRepository = userRepository;
     }
 
     public List<BookingResponse> reserveSeats(ReserveSeatsRequest request, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        if (!user.isEmailVerified()) {
+            throw new IllegalStateException("Please verify your email address before booking a seat.");
+        }
+
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new NotFoundException("Schedule not found: " + request.getScheduleId()));
 

@@ -37,6 +37,7 @@ export default function SeatSelect() {
     const [seatGenders, setSeatGenders] = useState({});
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [error, setError] = useState('');
+    const [needsVerification, setNeedsVerification] = useState(false);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState('');
     const [reloadKey, setReloadKey] = useState(0);
@@ -131,6 +132,7 @@ export default function SeatSelect() {
     async function confirmReserve(passengerGenders) {
         setShowGenderModal(false);
         setError('');
+        setNeedsVerification(false);
         setReserving(true);
         try {
             const res = await client.post('/bookings/reserve', {
@@ -146,7 +148,9 @@ export default function SeatSelect() {
                 state: { reservedUntil: res.data[0].reservedUntil },
             });
         } catch (err) {
-            setError(err.response?.data?.error || 'Could not reserve seat(s)');
+            const message = err.response?.data?.error || 'Could not reserve seat(s)';
+            setError(message);
+            setNeedsVerification(message.toLowerCase().includes('verify'));
             setReserving(false);
         }
     }
@@ -328,7 +332,17 @@ export default function SeatSelect() {
             </div>
 
             {error && (
-                <p className="text-red-600 dark:text-red-400 text-sm mt-4 text-center bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg px-4 py-2">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-4 text-center bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg px-4 py-2">
+                    {error}
+                    {needsVerification && (
+                        <>
+                            {' '}
+                            <button onClick={() => navigate('/verify')} className="font-semibold underline">
+                                Verify now
+                            </button>
+                        </>
+                    )}
+                </p>
             )}
 
             {/* Sticky selection summary bar */}

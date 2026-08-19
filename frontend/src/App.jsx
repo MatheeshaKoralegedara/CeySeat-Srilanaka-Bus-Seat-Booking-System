@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyAccount from './pages/VerifyAccount';
 import Home from './pages/Home';
 import Schedules from './pages/Schedules';
 import SeatSelect from './pages/SeatSelect';
@@ -25,6 +26,9 @@ export default function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/verify" element={
+                            <ProtectedRoute><VerifyAccount /></ProtectedRoute>
+                    } />
                     <Route path="/schedules" element={<Schedules />} />
                     <Route path="/seats/:scheduleId" element={<SeatSelect />} />
                     <Route path="/payment/:bookingId" element={<Payment />} />

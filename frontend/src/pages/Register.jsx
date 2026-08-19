@@ -35,7 +35,7 @@ export default function Register() {
         setLoading(true);
         try {
             await register(fullName, email, password, phone, nic);
-            navigate('/schedules');
+            navigate('/verify');
         } catch (err) {
             setError(err.response?.data?.error || 'Registration failed');
         } finally {

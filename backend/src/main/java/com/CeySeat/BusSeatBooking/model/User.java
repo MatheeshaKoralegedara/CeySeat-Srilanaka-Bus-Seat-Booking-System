@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.Instant;
+
 @Data
 @Document(collection = "users")
 public class User {
@@ -33,4 +35,11 @@ public class User {
     private String nic;
 
     private Role role;
+
+    private boolean emailVerified = false;
+
+    @JsonIgnore
+    private String emailOtpCode;
+    @JsonIgnore
+    private Instant emailOtpExpiresAt;
 }

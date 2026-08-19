@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,4 +21,11 @@ public class PaymentHashResponse {
     private String buyerEmail;
     private String buyerPhone;
     private boolean sandbox;
+    private String routeId;
+    private LocalDateTime departureTime;
+    private LocalDateTime arrivalTime;
+    private String travelName;
+    private String busModel;
+    private String registrationNo;
+    private String contactNumber;
 }

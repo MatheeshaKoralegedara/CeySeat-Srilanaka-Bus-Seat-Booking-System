@@ -166,6 +166,14 @@ export default function MyBookings() {
                                     </button>
                                 </>
                             )}
+                            {g.status === 'PAID' && (
+                                <Link
+                                    to={`/ticket/${g.groupBookingId}`}
+                                    className="text-sm text-accent-600 dark:text-accent-400 font-semibold hover:underline"
+                                >
+                                    {t('myBookings.viewTicket')}
+                                </Link>
+                            )}
                         </div>
                     </div>
                 ))}

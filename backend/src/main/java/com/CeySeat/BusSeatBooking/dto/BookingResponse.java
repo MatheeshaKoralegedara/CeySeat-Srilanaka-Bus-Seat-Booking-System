@@ -23,4 +23,6 @@ public class BookingResponse {
     private LocalDateTime arrivalTime;
     private String travelName;
     private String busModel;
+    private String registrationNo;
+    private String contactNumber;
 }

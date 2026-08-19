@@ -5,8 +5,12 @@ import com.CeySeat.BusSeatBooking.dto.PaymentHashResponse;
 import com.CeySeat.BusSeatBooking.exception.NotFoundException;
 import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
+import com.CeySeat.BusSeatBooking.model.Bus;
+import com.CeySeat.BusSeatBooking.model.Schedule;
 import com.CeySeat.BusSeatBooking.model.User;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
+import com.CeySeat.BusSeatBooking.repository.BusRepository;
+import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import com.CeySeat.BusSeatBooking.service.PayHereService;
 import jakarta.validation.Valid;
@@ -26,6 +30,8 @@ public class PaymentController {
     private final PayHereService payHereService;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final BusRepository busRepository;
 
     @PostMapping("/hash")
     public ResponseEntity<PaymentHashResponse> generateHash(@Valid @RequestBody PaymentHashRequest request,
@@ -55,6 +61,9 @@ public class PaymentController {
 
         List<String> seatNumbers = bookings.stream().map(Booking::getSeatNo).collect(Collectors.toList());
 
+        Schedule schedule = scheduleRepository.findById(bookings.get(0).getScheduleId()).orElse(null);
+        Bus bus = schedule != null ? busRepository.findById(schedule.getBusId()).orElse(null) : null;
+
         return ResponseEntity.ok(new PaymentHashResponse(
                 payHereService.getMerchantId(),
                 request.getGroupBookingId(),
@@ -66,7 +75,14 @@ public class PaymentController {
                 bookings.get(0).getReservedUntil(),
                 user.getEmail(),
                 user.getPhone(),
-                payHereService.isSandbox()
+                payHereService.isSandbox(),
+                schedule != null ? schedule.getRouteId() : null,
+                schedule != null ? schedule.getDepartureTime() : null,
+                schedule != null ? schedule.getArrivalTime() : null,
+                bus != null ? bus.getTravelName() : null,
+                bus != null ? bus.getModel() : null,
+                bus != null ? bus.getRegistrationNo() : null,
+                bus != null ? bus.getContactNumber() : null
         ));
     }
 }

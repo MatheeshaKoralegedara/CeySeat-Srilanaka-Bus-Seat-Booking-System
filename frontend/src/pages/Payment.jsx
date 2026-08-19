@@ -3,12 +3,11 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import client from '../api/client';
 import { SkeletonBlock } from '../components/Skeleton';
-import { QRCodeSVG } from 'qrcode.react';
 import BookingSteps from '../components/BookingSteps';
 import StatusScreen from '../components/StatusScreen';
+import TicketCard from '../components/TicketCard';
 import Badge from '../components/Badge';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/CEYSEAT.png';
 
 function useCountdown(deadline) {
     const [remainingMs, setRemainingMs] = useState(null);
@@ -84,7 +83,7 @@ export default function Payment() {
 
     function pay() {
         setStatus('processing');
-        const [firstName, ...rest] = (user?.fullName || 'Guest').trim().split(' ');
+        const [firstName, ...rest] = (user?.fullName || t('payment.guestName')).trim().split(' ');
         window.payhere.startPayment({
             sandbox: hashData.sandbox,
             merchant_id: hashData.merchantId,
@@ -145,12 +144,8 @@ export default function Payment() {
     }
 
     const seatCount = hashData.seatNumbers?.length || 0;
-    const seatLabel = t('payment.seat', { count: seatCount || 1 });
 
     if (status === 'success') {
-        const ticketId = groupBookingId.slice(-8).toUpperCase();
-        const qrValue = JSON.stringify({ groupBookingId, orderId: hashData.orderId, seats: hashData.seatNumbers });
-
         return (
             <div className="max-w-md mx-auto">
                 <div className="text-center mb-6">
@@ -163,49 +158,20 @@ export default function Payment() {
                     <p className="text-gray-500 dark:text-gray-400">{t('payment.ticketReady')}</p>
                 </div>
 
-                {/* Ticket card */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-brand-900/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div className="bg-brand-700 text-white px-6 py-4 flex items-center justify-between">
-                        <img src={logo} alt="CeySeat" className="h-8 w-auto bg-white rounded px-1.5 py-0.5" />
-                        <span className="text-xs bg-white/15 px-3 py-1 rounded-full font-mono tracking-wide">
-                            #{ticketId}
-                        </span>
-                    </div>
+                <TicketCard
+                    groupBookingId={groupBookingId}
+                    routeId={hashData.routeId}
+                    departureTime={hashData.departureTime}
+                    arrivalTime={hashData.arrivalTime}
+                    travelName={hashData.travelName}
+                    busModel={hashData.busModel}
+                    registrationNo={hashData.registrationNo}
+                    contactNumber={hashData.contactNumber}
+                    seatNumbers={hashData.seatNumbers}
+                    amount={hashData.amount}
+                />
 
-                    <div className="relative p-6 flex flex-col items-center">
-                        <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-surface dark:bg-surface-dark"></div>
-                        <div className="absolute right-0 top-0 translate-x-1/2 w-6 h-6 rounded-full bg-surface dark:bg-surface-dark"></div>
-
-                        <div className="bg-white p-3 rounded-xl border border-gray-100 mb-4 shadow-sm">
-                            <QRCodeSVG value={qrValue} size={160} fgColor="#551523" />
-                        </div>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">{t('payment.showQr')}</p>
-
-                        <div className="w-full border-t-2 border-dashed border-gray-200 dark:border-gray-700 pt-4 space-y-3 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400">{seatLabel}</span>
-                                <span className="font-semibold text-gray-900 dark:text-gray-100">{hashData.seatNumbers?.join(', ')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400">{t('payment.amountPaid')}</span>
-                                <span className="font-semibold text-gray-900 dark:text-gray-100">Rs. {hashData.amount}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400">{t('payment.paymentId')}</span>
-                                <span className="font-mono text-xs text-gray-700 dark:text-gray-300">{hashData.orderId.slice(-12)}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-500 dark:text-gray-400">{t('payment.status')}</span>
-                                <span className="inline-flex items-center gap-1.5 font-semibold text-green-600 dark:text-green-400">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                    {t('payment.confirmedStatus')}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-3 mt-6 no-print">
                     <button
                         onClick={() => window.print()}
                         className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold py-3 rounded-xl transition-colors"

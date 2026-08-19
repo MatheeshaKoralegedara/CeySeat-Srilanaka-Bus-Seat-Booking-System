@@ -166,8 +166,22 @@ public class BookingService {
                     schedule != null ? schedule.getDepartureTime() : null,
                     schedule != null ? schedule.getArrivalTime() : null,
                     bus != null ? bus.getTravelName() : null,
-                    bus != null ? bus.getModel() : null);
+                    bus != null ? bus.getModel() : null,
+                    bus != null ? bus.getRegistrationNo() : null,
+                    bus != null ? bus.getContactNumber() : null);
         }).collect(Collectors.toList());
+    }
+
+    public List<BookingResponse> getBookingGroup(String groupBookingId, String requestingUserId) {
+        List<Booking> bookings = bookingRepository.findByGroupBookingId(groupBookingId);
+        if (bookings.isEmpty()) {
+            throw new NotFoundException("Booking not found: " + groupBookingId);
+        }
+        boolean ownedByCaller = bookings.stream().allMatch(b -> b.getUserId().equals(requestingUserId));
+        if (!ownedByCaller) {
+            throw new SecurityException("You do not own this booking.");
+        }
+        return toResponses(bookings);
     }
 
     public List<BookingResponse> getMyBookings(String userId) {

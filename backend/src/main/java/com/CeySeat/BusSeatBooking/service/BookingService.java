@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private static final int HOLD_MINUTES = 20;
+    private static final int MAX_SEATS_PER_BOOKING = 6;
+    private static final Set<String> VALID_GENDERS = Set.of("MALE", "FEMALE");
 
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
@@ -50,6 +52,10 @@ public class BookingService {
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
         if (!user.isEmailVerified()) {
             throw new IllegalStateException("Please verify your email address before booking a seat.");
+        }
+
+        if (request.getSeatNumbers().size() > MAX_SEATS_PER_BOOKING) {
+            throw new SeatUnavailableException("You can reserve at most " + MAX_SEATS_PER_BOOKING + " seats per booking.");
         }
 
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
@@ -90,6 +96,9 @@ public class BookingService {
                 // this app, so a plain validation failure here maps to 409 instead of 400 —
                 // acceptable since this only triggers on a malformed request, never real usage.
                 throw new IllegalStateException("Missing passenger gender for seat " + seatNo);
+            }
+            if (!VALID_GENDERS.contains(gender)) {
+                throw new IllegalStateException("Invalid passenger gender for seat " + seatNo + ": " + gender);
             }
 
             Booking booking = new Booking();

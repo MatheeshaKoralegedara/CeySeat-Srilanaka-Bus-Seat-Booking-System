@@ -115,23 +115,6 @@ public class BookingService {
         return toResponses(saved);
     }
 
-    public BookingResponse payBooking(String bookingId, String paymentRef, String requestingUserId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Booking not found: " + bookingId));
-
-        if (!booking.getUserId().equals(requestingUserId)) {
-            throw new SecurityException("You do not own this booking.");
-        }
-
-        if (booking.getStatus() == BookingStatus.EXPIRED) {
-            throw new SeatUnavailableException("This reservation has expired. Please book again.");
-        }
-
-        booking.setStatus(BookingStatus.PAID);
-        booking.setPaymentReference(paymentRef);
-        return toResponses(List.of(bookingRepository.save(booking))).get(0);
-    }
-
     public List<BookingResponse> cancelBooking(String groupBookingId, String requestingUserId) {
         List<Booking> bookings = bookingRepository.findByGroupBookingId(groupBookingId);
         if (bookings.isEmpty()) {

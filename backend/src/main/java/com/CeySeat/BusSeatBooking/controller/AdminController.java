@@ -17,6 +17,10 @@ import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
 import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,7 +28,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +42,16 @@ public class AdminController {
     private final BusRepository busRepository;
     private final AdminAuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private static final int MAX_PAGE_SIZE = 100;
+
+    // Clients can request any page size via ?size=, so clamp it here rather
+    // than trusting @PageableDefault alone - that only sets the default when
+    // no size is given, it doesn't cap an explicit oversized one.
+    private Pageable capped(Pageable pageable) {
+        int size = Math.min(pageable.getPageSize(), MAX_PAGE_SIZE);
+        return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
+    }
 
     private void recordAudit(Authentication authentication, String action, String targetType, String targetId, String details) {
         User admin = userRepository.findById(authentication.getName()).orElse(null);
@@ -97,18 +110,14 @@ public class AdminController {
     }
 
     @GetMapping("/buses")
-    public List<BusResponse> getAllBuses() {
-        return busRepository.findAll().stream()
-                .map(this::toBusResponse)
-                .toList();
+    public Page<BusResponse> getAllBuses(@PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return busRepository.findAll(capped(pageable)).map(this::toBusResponse);
     }
 
     @GetMapping("/schedules")
-    public List<ScheduleResponse> getAllSchedules() {
-        return scheduleRepository.findAll().stream()
-                .map(this::toScheduleResponse)
-                .sorted(Comparator.comparing(ScheduleResponse::getDepartureTime))
-                .toList();
+    public Page<ScheduleResponse> getAllSchedules(
+            @PageableDefault(size = 20, sort = "departureTime") Pageable pageable) {
+        return scheduleRepository.findAll(capped(pageable)).map(this::toScheduleResponse);
     }
 
     @PutMapping("/schedules/{id}/status")
@@ -124,8 +133,8 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<User> getAllUsers(@PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return userRepository.findAll(capped(pageable));
     }
 
     @PostMapping("/users")
@@ -168,13 +177,13 @@ public class AdminController {
     }
 
     @GetMapping("/audit-logs")
-    public List<AdminAuditLog> getAuditLogs() {
-        return auditLogRepository.findAllByOrderByTimestampDesc();
+    public Page<AdminAuditLog> getAuditLogs(@PageableDefault(size = 20) Pageable pageable) {
+        return auditLogRepository.findAllByOrderByTimestampDesc(capped(pageable));
     }
 
     @GetMapping("/bookings")
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+    public Page<Booking> getAllBookings(@PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return bookingRepository.findAll(capped(pageable));
     }
 
     @GetMapping("/stats")

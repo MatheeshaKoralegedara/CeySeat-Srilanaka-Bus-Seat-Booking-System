@@ -17,14 +17,47 @@ const busTypeLabels = {
     LUXURY: 'Luxury',
 };
 
+// Mirrors AdminController's @PageableDefault(size = 20) for all five list endpoints.
+const emptyPage = { number: 0, totalPages: 1, totalElements: 0 };
+
+function Pagination({ page, onChange }) {
+    if (page.totalPages <= 1) return null;
+    return (
+        <div className="flex items-center justify-between mt-4 text-sm text-gray-500 dark:text-gray-400">
+            <span>Page {page.number + 1} of {page.totalPages} · {page.totalElements} total</span>
+            <div className="flex gap-2">
+                <button
+                    onClick={() => onChange(page.number - 1)}
+                    disabled={page.number <= 0}
+                    className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    Previous
+                </button>
+                <button
+                    onClick={() => onChange(page.number + 1)}
+                    disabled={page.number + 1 >= page.totalPages}
+                    className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    );
+}
+
 export default function AdminPanel() {
     const [tab, setTab] = useState('stats');
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
+    const [usersPage, setUsersPage] = useState(emptyPage);
     const [bookings, setBookings] = useState([]);
+    const [bookingsPage, setBookingsPage] = useState(emptyPage);
     const [schedules, setSchedules] = useState([]);
+    const [schedulesPage, setSchedulesPage] = useState(emptyPage);
     const [buses, setBuses] = useState([]);
+    const [busesPage, setBusesPage] = useState(emptyPage);
     const [auditLogs, setAuditLogs] = useState([]);
+    const [auditLogsPage, setAuditLogsPage] = useState(emptyPage);
     const [loading, setLoading] = useState(true);
     const [details, setDetails] = useState(null);
     const [showAddUser, setShowAddUser] = useState(false);
@@ -32,33 +65,56 @@ export default function AdminPanel() {
     const [addUserError, setAddUserError] = useState('');
     const [addingUser, setAddingUser] = useState(false);
 
-    function loadSchedules() {
-        client.get('/admin/schedules').then((res) => setSchedules(res.data)).catch(() => setSchedules([]));
+    function loadUsers(page = 0) {
+        client.get('/admin/users', { params: { page } })
+            .then((res) => { setUsers(res.data.content); setUsersPage(res.data); })
+            .catch(() => { setUsers([]); setUsersPage(emptyPage); });
     }
 
-    function loadBuses() {
-        client.get('/admin/buses').then((res) => setBuses(res.data)).catch(() => setBuses([]));
+    function loadBookings(page = 0) {
+        client.get('/admin/bookings', { params: { page } })
+            .then((res) => { setBookings(res.data.content); setBookingsPage(res.data); })
+            .catch(() => { setBookings([]); setBookingsPage(emptyPage); });
     }
 
-    function loadAuditLogs() {
-        client.get('/admin/audit-logs').then((res) => setAuditLogs(res.data)).catch(() => setAuditLogs([]));
+    function loadSchedules(page = 0) {
+        client.get('/admin/schedules', { params: { page } })
+            .then((res) => { setSchedules(res.data.content); setSchedulesPage(res.data); })
+            .catch(() => { setSchedules([]); setSchedulesPage(emptyPage); });
+    }
+
+    function loadBuses(page = 0) {
+        client.get('/admin/buses', { params: { page } })
+            .then((res) => { setBuses(res.data.content); setBusesPage(res.data); })
+            .catch(() => { setBuses([]); setBusesPage(emptyPage); });
+    }
+
+    function loadAuditLogs(page = 0) {
+        client.get('/admin/audit-logs', { params: { page } })
+            .then((res) => { setAuditLogs(res.data.content); setAuditLogsPage(res.data); })
+            .catch(() => { setAuditLogs([]); setAuditLogsPage(emptyPage); });
     }
 
     useEffect(() => {
         Promise.all([
             client.get('/admin/stats'),
-            client.get('/admin/users'),
-            client.get('/admin/bookings'),
-            client.get('/admin/schedules'),
-            client.get('/admin/buses'),
-            client.get('/admin/audit-logs'),
+            client.get('/admin/users', { params: { page: 0 } }),
+            client.get('/admin/bookings', { params: { page: 0 } }),
+            client.get('/admin/schedules', { params: { page: 0 } }),
+            client.get('/admin/buses', { params: { page: 0 } }),
+            client.get('/admin/audit-logs', { params: { page: 0 } }),
         ]).then(([statsRes, usersRes, bookingsRes, schedulesRes, busesRes, auditLogsRes]) => {
             setStats(statsRes.data);
-            setUsers(usersRes.data);
-            setBookings(bookingsRes.data);
-            setSchedules(schedulesRes.data);
-            setBuses(busesRes.data);
-            setAuditLogs(auditLogsRes.data);
+            setUsers(usersRes.data.content);
+            setUsersPage(usersRes.data);
+            setBookings(bookingsRes.data.content);
+            setBookingsPage(bookingsRes.data);
+            setSchedules(schedulesRes.data.content);
+            setSchedulesPage(schedulesRes.data);
+            setBuses(busesRes.data.content);
+            setBusesPage(busesRes.data);
+            setAuditLogs(auditLogsRes.data.content);
+            setAuditLogsPage(auditLogsRes.data);
         }).finally(() => setLoading(false));
     }, []);
 
@@ -171,6 +227,8 @@ export default function AdminPanel() {
         }
     }
 
+    // Only counts the currently loaded page of schedules, not the full dataset —
+    // fine as a "there's something to look at" indicator, not an exact total.
     const pendingCount = schedules.filter((s) => s.status === 'PENDING').length;
 
     if (loading) {
@@ -288,29 +346,34 @@ export default function AdminPanel() {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination page={usersPage} onChange={loadUsers} />
                 </div>
             )}
 
             {tab === 'bookings' && (
-                <div className="grid gap-3">
-                    {bookings.map((b) => (
-                        <div key={b.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap items-center justify-between gap-2 text-sm hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
-                            <span className="font-mono text-gray-500 dark:text-gray-400">{b.id.slice(-8)}</span>
-                            <span className="text-gray-900 dark:text-gray-100">Seat {b.seatNo}</span>
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">Rs. {b.fare}</span>
-                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                                b.status === 'PAID' ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400' :
-                                b.status === 'RESERVED' ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400' :
-                                'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                            }`}>
-                                {b.status}
-                            </span>
-                        </div>
-                    ))}
-                </div>
+                <>
+                    <div className="grid gap-3">
+                        {bookings.map((b) => (
+                            <div key={b.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap items-center justify-between gap-2 text-sm hover:border-brand-200 dark:hover:border-brand-500 transition-colors">
+                                <span className="font-mono text-gray-500 dark:text-gray-400">{b.id.slice(-8)}</span>
+                                <span className="text-gray-900 dark:text-gray-100">Seat {b.seatNo}</span>
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">Rs. {b.fare}</span>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                                    b.status === 'PAID' ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400' :
+                                    b.status === 'RESERVED' ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400' :
+                                    'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                                }`}>
+                                    {b.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <Pagination page={bookingsPage} onChange={loadBookings} />
+                </>
             )}
 
             {tab === 'buses' && (
+                <>
                 <div className="grid gap-3">
                     {buses.length === 0 && (
                         <p className="text-sm text-gray-400 dark:text-gray-500">No buses yet.</p>
@@ -345,9 +408,12 @@ export default function AdminPanel() {
                         </div>
                     ))}
                 </div>
+                <Pagination page={busesPage} onChange={loadBuses} />
+                </>
             )}
 
             {tab === 'schedules' && (
+                <>
                 <div className="grid gap-3">
                     {schedules.length === 0 && (
                         <p className="text-sm text-gray-400 dark:text-gray-500">No schedules yet.</p>
@@ -394,9 +460,12 @@ export default function AdminPanel() {
                         </div>
                     ))}
                 </div>
+                <Pagination page={schedulesPage} onChange={loadSchedules} />
+                </>
             )}
 
             {tab === 'audit log' && (
+                <>
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-sm">
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-left">
@@ -430,6 +499,8 @@ export default function AdminPanel() {
                         </tbody>
                     </table>
                 </div>
+                <Pagination page={auditLogsPage} onChange={loadAuditLogs} />
+                </>
             )}
 
             <DetailsModal

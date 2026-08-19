@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private static final int HOLD_MINUTES = 20;
+    private static final int MAX_SEATS_PER_BOOKING = 6;
+    private static final Set<String> VALID_GENDERS = Set.of("MALE", "FEMALE");
 
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
@@ -50,6 +52,10 @@ public class BookingService {
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
         if (!user.isEmailVerified()) {
             throw new IllegalStateException("Please verify your email address before booking a seat.");
+        }
+
+        if (request.getSeatNumbers().size() > MAX_SEATS_PER_BOOKING) {
+            throw new SeatUnavailableException("You can reserve at most " + MAX_SEATS_PER_BOOKING + " seats per booking.");
         }
 
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
@@ -91,6 +97,9 @@ public class BookingService {
                 // acceptable since this only triggers on a malformed request, never real usage.
                 throw new IllegalStateException("Missing passenger gender for seat " + seatNo);
             }
+            if (!VALID_GENDERS.contains(gender)) {
+                throw new IllegalStateException("Invalid passenger gender for seat " + seatNo + ": " + gender);
+            }
 
             Booking booking = new Booking();
             booking.setScheduleId(request.getScheduleId());
@@ -113,23 +122,6 @@ public class BookingService {
         }
 
         return toResponses(saved);
-    }
-
-    public BookingResponse payBooking(String bookingId, String paymentRef, String requestingUserId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Booking not found: " + bookingId));
-
-        if (!booking.getUserId().equals(requestingUserId)) {
-            throw new SecurityException("You do not own this booking.");
-        }
-
-        if (booking.getStatus() == BookingStatus.EXPIRED) {
-            throw new SeatUnavailableException("This reservation has expired. Please book again.");
-        }
-
-        booking.setStatus(BookingStatus.PAID);
-        booking.setPaymentReference(paymentRef);
-        return toResponses(List.of(bookingRepository.save(booking))).get(0);
     }
 
     public List<BookingResponse> cancelBooking(String groupBookingId, String requestingUserId) {

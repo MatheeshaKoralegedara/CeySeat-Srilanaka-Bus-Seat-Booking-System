@@ -16,6 +16,7 @@ import java.time.Instant;
 public class OtpService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int MAX_ATTEMPTS = 5;
 
     private final UserRepository userRepository;
     private final EmailService emailService;
@@ -36,6 +37,7 @@ public class OtpService {
         String code = generateCode();
         user.setEmailOtpCode(code);
         user.setEmailOtpExpiresAt(Instant.now().plusSeconds(expiryMinutes * 60L));
+        user.setEmailOtpAttempts(0);
         userRepository.save(user);
 
         emailService.sendOtpEmail(user.getEmail(), code, expiryMinutes);
@@ -58,14 +60,31 @@ public class OtpService {
                 || user.getEmailOtpExpiresAt().isBefore(Instant.now())) {
             throw new IllegalStateException("This code has expired. Please request a new one.");
         }
+        if (user.getEmailOtpAttempts() >= MAX_ATTEMPTS) {
+            invalidateOtp(user);
+            userRepository.save(user);
+            throw new IllegalStateException("Too many incorrect attempts. Please request a new code.");
+        }
         if (!user.getEmailOtpCode().equals(request.getCode())) {
+            user.setEmailOtpAttempts(user.getEmailOtpAttempts() + 1);
+            if (user.getEmailOtpAttempts() >= MAX_ATTEMPTS) {
+                invalidateOtp(user);
+                userRepository.save(user);
+                throw new IllegalStateException("Too many incorrect attempts. Please request a new code.");
+            }
+            userRepository.save(user);
             throw new IllegalStateException("Incorrect verification code.");
         }
 
         user.setEmailVerified(true);
-        user.setEmailOtpCode(null);
-        user.setEmailOtpExpiresAt(null);
+        invalidateOtp(user);
         User saved = userRepository.save(user);
         return new VerificationStatusResponse(saved.isEmailVerified());
+    }
+
+    private void invalidateOtp(User user) {
+        user.setEmailOtpCode(null);
+        user.setEmailOtpExpiresAt(null);
+        user.setEmailOtpAttempts(0);
     }
 }

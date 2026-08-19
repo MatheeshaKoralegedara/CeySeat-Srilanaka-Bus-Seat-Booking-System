@@ -24,6 +24,7 @@ export default function AdminPanel() {
     const [bookings, setBookings] = useState([]);
     const [schedules, setSchedules] = useState([]);
     const [buses, setBuses] = useState([]);
+    const [auditLogs, setAuditLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [details, setDetails] = useState(null);
     const [showAddUser, setShowAddUser] = useState(false);
@@ -39,6 +40,10 @@ export default function AdminPanel() {
         client.get('/admin/buses').then((res) => setBuses(res.data)).catch(() => setBuses([]));
     }
 
+    function loadAuditLogs() {
+        client.get('/admin/audit-logs').then((res) => setAuditLogs(res.data)).catch(() => setAuditLogs([]));
+    }
+
     useEffect(() => {
         Promise.all([
             client.get('/admin/stats'),
@@ -46,12 +51,14 @@ export default function AdminPanel() {
             client.get('/admin/bookings'),
             client.get('/admin/schedules'),
             client.get('/admin/buses'),
-        ]).then(([statsRes, usersRes, bookingsRes, schedulesRes, busesRes]) => {
+            client.get('/admin/audit-logs'),
+        ]).then(([statsRes, usersRes, bookingsRes, schedulesRes, busesRes, auditLogsRes]) => {
             setStats(statsRes.data);
             setUsers(usersRes.data);
             setBookings(bookingsRes.data);
             setSchedules(schedulesRes.data);
             setBuses(busesRes.data);
+            setAuditLogs(auditLogsRes.data);
         }).finally(() => setLoading(false));
     }, []);
 
@@ -115,6 +122,7 @@ export default function AdminPanel() {
             const res = await client.post('/admin/users', newUser);
             setUsers((prev) => [...prev, res.data]);
             setShowAddUser(false);
+            loadAuditLogs();
         } catch (err) {
             setAddUserError(err.response?.data?.error || 'Could not create user');
         } finally {
@@ -127,6 +135,7 @@ export default function AdminPanel() {
         try {
             await client.put(`/admin/users/${userId}/role`, { role: newRole });
             setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
+            loadAuditLogs();
         } catch {
             alert('Could not update role');
         }
@@ -136,6 +145,7 @@ export default function AdminPanel() {
         try {
             await client.put(`/admin/schedules/${scheduleId}/status`, { status });
             setSchedules((prev) => prev.map((s) => s.id === scheduleId ? { ...s, status } : s));
+            loadAuditLogs();
         } catch {
             alert('Could not update schedule status');
         }
@@ -191,7 +201,7 @@ export default function AdminPanel() {
             <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Admin Panel</h1>
 
             <div className="flex gap-2 mb-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-                {['stats', 'users', 'bookings', 'buses', 'schedules'].map((t) => (
+                {['stats', 'users', 'bookings', 'buses', 'schedules', 'audit log'].map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -383,6 +393,42 @@ export default function AdminPanel() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {tab === 'audit log' && (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-sm">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-left">
+                            <tr>
+                                <th className="px-4 py-3 font-medium">When</th>
+                                <th className="px-4 py-3 font-medium">Admin</th>
+                                <th className="px-4 py-3 font-medium">Action</th>
+                                <th className="px-4 py-3 font-medium">Target</th>
+                                <th className="px-4 py-3 font-medium">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {auditLogs.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-4 py-6 text-center text-gray-400 dark:text-gray-500">No admin actions recorded yet.</td>
+                                </tr>
+                            )}
+                            {auditLogs.map((log) => (
+                                <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{log.adminEmail || log.adminId}</td>
+                                    <td className="px-4 py-3">
+                                        <span className="text-xs font-semibold bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-300 px-2 py-0.5 rounded-full">
+                                            {log.action}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{log.targetType} · {log.targetId?.slice(-8)}</td>
+                                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{log.details}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 

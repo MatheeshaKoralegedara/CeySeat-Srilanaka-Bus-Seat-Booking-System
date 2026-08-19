@@ -3,6 +3,7 @@ package com.CeySeat.BusSeatBooking.controller;
 import com.CeySeat.BusSeatBooking.dto.BusResponse;
 import com.CeySeat.BusSeatBooking.dto.ScheduleResponse;
 import com.CeySeat.BusSeatBooking.exception.NotFoundException;
+import com.CeySeat.BusSeatBooking.model.AdminAuditLog;
 import com.CeySeat.BusSeatBooking.model.Booking;
 import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
@@ -10,6 +11,7 @@ import com.CeySeat.BusSeatBooking.model.Role;
 import com.CeySeat.BusSeatBooking.model.Schedule;
 import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
 import com.CeySeat.BusSeatBooking.model.User;
+import com.CeySeat.BusSeatBooking.repository.AdminAuditLogRepository;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
@@ -17,9 +19,11 @@ import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +37,22 @@ public class AdminController {
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
     private final BusRepository busRepository;
+    private final AdminAuditLogRepository auditLogRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private void recordAudit(Authentication authentication, String action, String targetType, String targetId, String details) {
+        User admin = userRepository.findById(authentication.getName()).orElse(null);
+
+        AdminAuditLog log = new AdminAuditLog();
+        log.setAdminId(authentication.getName());
+        log.setAdminEmail(admin != null ? admin.getEmail() : null);
+        log.setAction(action);
+        log.setTargetType(targetType);
+        log.setTargetId(targetId);
+        log.setDetails(details);
+        log.setTimestamp(Instant.now());
+        auditLogRepository.save(log);
+    }
 
     private ScheduleResponse toScheduleResponse(Schedule schedule) {
         Bus bus = busRepository.findById(schedule.getBusId()).orElse(null);
@@ -93,11 +112,15 @@ public class AdminController {
     }
 
     @PutMapping("/schedules/{id}/status")
-    public ResponseEntity<ScheduleResponse> updateScheduleStatus(@PathVariable String id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<ScheduleResponse> updateScheduleStatus(@PathVariable String id, @RequestBody Map<String, String> body, Authentication authentication) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Schedule not found: " + id));
+        ScheduleStatus previousStatus = schedule.getStatus();
         schedule.setStatus(ScheduleStatus.valueOf(body.get("status")));
-        return ResponseEntity.ok(toScheduleResponse(scheduleRepository.save(schedule)));
+        Schedule saved = scheduleRepository.save(schedule);
+        recordAudit(authentication, "UPDATE_SCHEDULE_STATUS", "Schedule", id,
+                previousStatus + " -> " + saved.getStatus());
+        return ResponseEntity.ok(toScheduleResponse(saved));
     }
 
     @GetMapping("/users")
@@ -106,7 +129,7 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody Map<String, String> body) {
+    public ResponseEntity<User> createUser(@RequestBody Map<String, String> body, Authentication authentication) {
         String email = body.get("email");
         if (email == null || email.isBlank()) {
             throw new IllegalStateException("Email is required.");
@@ -126,15 +149,27 @@ public class AdminController {
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(body.get("role") != null ? Role.valueOf(body.get("role")) : Role.USER);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userRepository.save(user));
+        User saved = userRepository.save(user);
+        recordAudit(authentication, "CREATE_USER", "User", saved.getId(),
+                "email=" + saved.getEmail() + ", role=" + saved.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/users/{userId}/role")
-    public User updateRole(@PathVariable String userId, @RequestBody Map<String, String> body) {
+    public User updateRole(@PathVariable String userId, @RequestBody Map<String, String> body, Authentication authentication) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        Role previousRole = user.getRole();
         user.setRole(Role.valueOf(body.get("role")));
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        recordAudit(authentication, "UPDATE_USER_ROLE", "User", userId,
+                previousRole + " -> " + saved.getRole());
+        return saved;
+    }
+
+    @GetMapping("/audit-logs")
+    public List<AdminAuditLog> getAuditLogs() {
+        return auditLogRepository.findAllByOrderByTimestampDesc();
     }
 
     @GetMapping("/bookings")

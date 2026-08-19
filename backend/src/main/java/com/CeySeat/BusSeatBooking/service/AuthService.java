@@ -8,6 +8,7 @@ import com.CeySeat.BusSeatBooking.model.Role;
 import com.CeySeat.BusSeatBooking.model.User;
 import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,17 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
 
-        User saved = userRepository.save(user);
+        User saved;
+        try {
+            saved = userRepository.save(user);
+        } catch (DuplicateKeyException e) {
+            // Two concurrent registrations can both pass the existsByEmail
+            // check above; the unique index on email is the real guard, but
+            // its failure must still surface as an email conflict, not the
+            // generic DuplicateKeyException -> "seat already booked" mapping
+            // in GlobalExceptionHandler.
+            throw new IllegalStateException("An account with this email already exists.");
+        }
         String token = jwtService.generateToken(saved.getId(), saved.getRole().name());
 
         return new AuthResponse(token, saved.getId(), saved.getFullName(), saved.getRole().name());

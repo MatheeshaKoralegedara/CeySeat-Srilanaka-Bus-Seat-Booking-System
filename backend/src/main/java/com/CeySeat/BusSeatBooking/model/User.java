@@ -42,4 +42,6 @@ public class User {
     private String emailOtpCode;
     @JsonIgnore
     private Instant emailOtpExpiresAt;
+    @JsonIgnore
+    private int emailOtpAttempts = 0;
 }

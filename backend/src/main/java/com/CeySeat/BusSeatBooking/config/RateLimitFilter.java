@@ -27,7 +27,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
         boolean limited = path.equals("/api/bookings/reserve") || path.contains("/pay")
-                || path.equals("/api/payments/hash");
+                || path.equals("/api/payments/hash") || path.equals("/api/auth/verify-otp");
 
         if (limited) {
             // Runs after JwtAuthFilter, so the authenticated principal is

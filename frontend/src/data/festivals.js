@@ -1,5 +1,7 @@
 
 import snowflake from '../assets/festive/snowflake.png';
+import santaHat from '../assets/festive/santa-hat.png';
+import giftbox from '../assets/festive/giftbox.png';
 import  fire from '../assets/festive/fire.png';
 import drumer from '../assets/festive/drumer.png';
 import dancer from '../assets/festive/dancer.png';
@@ -33,14 +35,16 @@ export const festivals = [
         name: 'independence',
         start: '02-03',
         end: '02-04',
-        icons: ['🇱🇰'],
+        icons: [],
+        // Rendered by <IndependenceFlag> instead of the generic falling-icon overlay
+        isFlag: true,
     },
     {
         name: 'christmas',
-        start: '12-20',
+        start: '12-01',
         end: '12-30',
-        icons: [ snowflake],
-        isSnow: true, // special-case: real falling snow effect instead of floating icons
+        icons: [snowflake, santaHat, giftbox],
+        message: '🎄 Merry Christmas! Book your holiday trips early — seats fill up fast.',
     },
      {
         name: 'perahera',
@@ -52,8 +56,23 @@ export const festivals = [
     },
 ];
 
-export function getActiveFestival() {
+function todayMonthDay() {
     const now = new Date();
-    const monthDay = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    return festivals.find((f) => monthDay >= f.start && monthDay <= f.end) || null;
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${month}-${day}`;
+}
+
+export function getActiveFestival() {
+    // Lets you preview any festival locally without touching this file,
+    // e.g. http://localhost:5173/?festival=christmas
+    if (typeof window !== 'undefined') {
+        const override = new URLSearchParams(window.location.search).get('festival');
+        if (override) {
+            return festivals.find(f => f.name === override) || null;
+        }
+    }
+
+    const today = todayMonthDay();
+    return festivals.find(f => today >= f.start && today <= f.end) || null;
 }

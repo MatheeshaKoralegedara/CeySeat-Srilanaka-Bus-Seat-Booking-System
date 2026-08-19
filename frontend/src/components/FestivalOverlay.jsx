@@ -10,7 +10,7 @@ export default function FestiveOverlay() {
     const [particles, setParticles] = useState([]);
 
     useEffect(() => {
-        if (!festival || festival.isMarquee) return;
+        if (!festival || festival.isMarquee || festival.isFlag) return;
 
         // Fewer, smaller particles — this now falls inside the header strip,
         // not the full viewport, so the old full-page counts would overcrowd it.
@@ -26,7 +26,7 @@ export default function FestiveOverlay() {
         setParticles(generated);
     }, [festival]);
 
-    if (!festival || festival.isMarquee) return null;
+    if (!festival || festival.isMarquee || festival.isFlag) return null;
 
     return (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">

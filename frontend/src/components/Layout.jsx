@@ -10,6 +10,7 @@ import TimeGreeting from './TimeGreeting';
 import PeraheraMarquee from './PeraheraMarquee';
 import FestivalMessage from './FestivalMessage';
 import Fireworks from './Fireworks';
+import IndependenceFlag from './IndependenceFlag';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
@@ -70,6 +71,7 @@ export default function Layout({ children }) {
                         <Link to="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
                             <img src={logo} alt="CeySeat" className={`h-16 md:h-24 w-auto ${transparentHeader ? 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]' : ''}`} />
                         </Link>
+                        <IndependenceFlag />
                     </div>
                     
                     <nav className="hidden md:flex items-center gap-5 text-sm font-medium">

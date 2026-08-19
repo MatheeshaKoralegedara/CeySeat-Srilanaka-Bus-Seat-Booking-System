@@ -117,8 +117,8 @@ h1, h2, h3, .font-display {
 }
 
 @keyframes peraheraScroll {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0%); }
 }
 
 .animate-perahera-scroll {
@@ -152,6 +152,30 @@ h1, h2, h3, .font-display {
 
 .animate-message-pulse {
     animation: messagePulse 1.8s ease-in-out infinite;
+}
+
+.flag-wave-container {
+    display: flex;
+    overflow:  -moz-hidden-unscrollable;
+    border-radius: 2px;
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.3));
+}
+
+.flag-wave-strip {
+    height: 100%;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+    transform-origin: center;
+    animation: flagStripFlutter 1.9s ease-in-out infinite;
+    will-change: transform;
+}
+
+@keyframes flagStripFlutter {
+   0%   { transform: translateY(0) scaleY(1); }
+    25%  { transform: translateY(-2px) scaleY(0.94); }
+    50%  { transform: translateY(0) scaleY(1); }
+    75%  { transform: translateY(2px) scaleY(0.94); }
+    100% { transform: translateY(0) scaleY(1); }
 }
 
 .navbar-motif {

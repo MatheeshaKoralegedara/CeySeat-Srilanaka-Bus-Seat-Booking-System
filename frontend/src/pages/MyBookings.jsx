@@ -24,7 +24,11 @@ function groupBookings(bookings) {
     for (const b of bookings) {
         const key = b.groupBookingId || b.id;
         if (!groups.has(key)) {
-            groups.set(key, { groupBookingId: key, seats: [], status: b.status, reservedUntil: b.reservedUntil, totalFare: 0, firstId: b.id });
+            groups.set(key, {
+                groupBookingId: key, seats: [], status: b.status, reservedUntil: b.reservedUntil, totalFare: 0, firstId: b.id,
+                routeId: b.routeId, departureTime: b.departureTime, arrivalTime: b.arrivalTime,
+                travelName: b.travelName, busModel: b.busModel,
+            });
         }
         const g = groups.get(key);
         g.seats.push(b.seatNo);
@@ -122,12 +126,18 @@ export default function MyBookings() {
                                 )}
                             </div>
                             <div className="min-w-0">
-                                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                {g.routeId && (
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                        {g.routeId}
+                                    </p>
+                                )}
+                                <p className={g.routeId ? 'text-sm text-gray-500 dark:text-gray-400 truncate' : 'font-semibold text-gray-900 dark:text-gray-100 truncate'}>
+                                    {g.travelName && `${g.travelName} · `}
                                     {g.seats.length > 1 ? `${g.seats.length} ${t('myBookings.seat', { count: g.seats.length })}` : t('myBookings.seat', { count: 1 })} {g.seats.length === 1 ? g.seats[0] : `(${g.seats.join(', ')})`}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {g.reservedUntil && new Date(g.reservedUntil).toLocaleDateString(locale, {
-                                        month: 'short', day: 'numeric', year: 'numeric',
+                                    {g.departureTime && new Date(g.departureTime).toLocaleString(locale, {
+                                        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
                                     })}
                                 </p>
                             </div>

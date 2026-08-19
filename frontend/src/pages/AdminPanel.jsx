@@ -123,6 +123,7 @@ export default function AdminPanel() {
     }
 
     async function changeRole(userId, newRole) {
+        if (!window.confirm(`Change this user's role to ${newRole}?`)) return;
         try {
             await client.put(`/admin/users/${userId}/role`, { role: newRole });
             setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));

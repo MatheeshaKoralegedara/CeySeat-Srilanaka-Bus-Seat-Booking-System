@@ -24,6 +24,12 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRequest(InvalidRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(SeatUnavailableException.class)
     public ResponseEntity<Map<String, String>> handleSeatUnavailable(SeatUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)

@@ -1,6 +1,7 @@
 package com.CeySeat.BusSeatBooking.controller;
 
 import com.CeySeat.BusSeatBooking.dto.ScheduleResponse;
+import com.CeySeat.BusSeatBooking.exception.InvalidRequestException;
 import com.CeySeat.BusSeatBooking.exception.NotFoundException;
 import com.CeySeat.BusSeatBooking.model.BookingStatus;
 import com.CeySeat.BusSeatBooking.model.Bus;
@@ -84,7 +85,7 @@ public class ScheduleController {
             LocalDateTime endTime = LocalDateTime.parse(end);
             results = scheduleRepository.findByRouteIdAndDepartureTimeBetween(routeId, startTime, endTime);
         } else {
-            throw new IllegalArgumentException("Provide either no filters, routeId alone, or routeId with both start and end.");
+            throw new InvalidRequestException("Provide either no filters, routeId alone, or routeId with both start and end.");
         }
 
         // Passengers only ever see schedules an admin has approved.

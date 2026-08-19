@@ -121,6 +121,25 @@ public class BookingService {
         return toResponse(bookingRepository.save(booking));
     }
 
+    public List<BookingResponse> cancelBooking(String groupBookingId, String requestingUserId) {
+        List<Booking> bookings = bookingRepository.findByGroupBookingId(groupBookingId);
+        if (bookings.isEmpty()) {
+            throw new NotFoundException("Booking not found: " + groupBookingId);
+        }
+
+        for (Booking booking : bookings) {
+            if (!booking.getUserId().equals(requestingUserId)) {
+                throw new SecurityException("You do not own this booking.");
+            }
+            if (booking.getStatus() != BookingStatus.RESERVED) {
+                throw new SeatUnavailableException("Only reserved bookings can be cancelled.");
+            }
+        }
+
+        bookings.forEach(b -> b.setStatus(BookingStatus.CANCELLED));
+        return bookingRepository.saveAll(bookings).stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
     public List<BookingResponse> getBookedSeats(String scheduleId) {
         return bookingRepository
                 .findByScheduleIdAndStatusIn(scheduleId, List.of(BookingStatus.RESERVED, BookingStatus.PAID))

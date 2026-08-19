@@ -39,6 +39,7 @@ export default function MyBookings() {
     const { t, i18n } = useTranslation();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [cancellingId, setCancellingId] = useState(null);
     const locale = toBcp47Locale(i18n.language);
 
     useEffect(() => {
@@ -47,6 +48,19 @@ export default function MyBookings() {
             .catch(() => setBookings([]))
             .finally(() => setLoading(false));
     }, []);
+
+    const handleCancel = (groupBookingId) => {
+        if (!window.confirm(t('myBookings.cancelConfirm'))) return;
+        setCancellingId(groupBookingId);
+        client.post(`/bookings/${groupBookingId}/cancel`)
+            .then(() => {
+                setBookings((prev) => prev.map((b) =>
+                    (b.groupBookingId || b.id) === groupBookingId ? { ...b, status: 'CANCELLED' } : b
+                ));
+            })
+            .catch(() => window.alert(t('myBookings.cancelError')))
+            .finally(() => setCancellingId(null));
+    };
 
     if (loading) {
         return (
@@ -125,12 +139,22 @@ export default function MyBookings() {
                                 {statusKeys[g.status] ? t(statusKeys[g.status]) : g.status}
                             </span>
                             {g.status === 'RESERVED' && (
-                                <Link
-                                    to={`/payment/${g.groupBookingId}`}
-                                    className="text-sm text-accent-600 dark:text-accent-400 font-semibold hover:underline"
-                                >
-                                    {t('myBookings.payNow')}
-                                </Link>
+                                <>
+                                    <Link
+                                        to={`/payment/${g.groupBookingId}`}
+                                        className="text-sm text-accent-600 dark:text-accent-400 font-semibold hover:underline"
+                                    >
+                                        {t('myBookings.payNow')}
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCancel(g.groupBookingId)}
+                                        disabled={cancellingId === g.groupBookingId}
+                                        className="text-sm text-red-600 dark:text-red-400 font-semibold hover:underline disabled:opacity-50"
+                                    >
+                                        {cancellingId === g.groupBookingId ? t('myBookings.cancelling') : t('myBookings.cancel')}
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>

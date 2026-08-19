@@ -36,15 +36,15 @@ export function AuthProvider({ children }) {
     async function login(email, password) {
         const res = await client.post('/auth/login', { email, password });
         localStorage.setItem('ceyseat_token', res.data.token);
-        const userData = { userId: res.data.userId, fullName: res.data.fullName, role: res.data.role };
+        const userData = { userId: res.data.userId, fullName: res.data.fullName, role: res.data.role, email };
         localStorage.setItem('ceyseat_user', JSON.stringify(userData));
         setUser(userData);
     }
 
-    async function register(fullName, email, password, phone) {
-        const res = await client.post('/auth/register', { fullName, email, password, phone });
+    async function register(fullName, email, password, phone, nic) {
+        const res = await client.post('/auth/register', { fullName, email, password, phone, nic });
         localStorage.setItem('ceyseat_token', res.data.token);
-        const userData = { userId: res.data.userId, fullName: res.data.fullName, role: res.data.role };
+        const userData = { userId: res.data.userId, fullName: res.data.fullName, role: res.data.role, email };
         localStorage.setItem('ceyseat_user', JSON.stringify(userData));
         setUser(userData);
     }
@@ -54,8 +54,16 @@ export function AuthProvider({ children }) {
         setUser(null);
     }
 
+    async function verifyOtp(email, code) {
+        return client.post('/auth/verify-otp', { email, code });
+    }
+
+    async function resendOtp(email) {
+        return client.post('/auth/resend-otp', { email });
+    }
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout }}>
+        <AuthContext.Provider value={{ user, login, register, logout, verifyOtp, resendOtp }}>
             {children}
         </AuthContext.Provider>
     );

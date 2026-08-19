@@ -81,7 +81,8 @@
     "selectGenderNote": "Please be mindful if the next seat is booked by a passenger of the opposite gender.",
     "male": "Male",
     "female": "Female",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Retry"
   },
   "payment": {
     "totalAmount": "Total amount",
@@ -108,7 +109,10 @@
     "errorMessage": "Your payment could not be processed. Please try again.",
     "tryAgain": "Try Again",
     "seatsHeld": "Seats held for {{time}}",
-    "holdExpired": "Your seat hold has expired"
+    "holdExpired": "Your seat hold has expired",
+    "guestName": "Guest",
+    "departure": "Departure",
+    "arrival": "Arrival"
   },
   "myBookings": {
     "title": "My Bookings",
@@ -117,10 +121,20 @@
     "seat_one": "Seat",
     "seat_other": "seats",
     "payNow": "Pay Now",
+    "cancel": "Cancel",
+    "cancelling": "Cancelling...",
+    "cancelConfirm": "Are you sure you want to cancel this booking?",
+    "cancelError": "Failed to cancel booking. Please try again.",
+    "viewTicket": "View Ticket",
     "statusPaid": "Paid",
     "statusReserved": "Reserved",
     "statusExpired": "Expired",
     "statusCancelled": "Cancelled"
+  },
+  "ticket": {
+    "title": "Your Ticket",
+    "notPaidTitle": "Ticket Not Available",
+    "notPaidMessage": "This booking hasn't been paid for, so there's no ticket to show yet."
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -135,6 +149,9 @@
     "registerSubtitle": "Book bus seats across Sri Lanka",
     "fullName": "Full Name",
     "phone": "Phone",
+    "nic": "NIC Number",
+    "invalidPhone": "Enter a valid Sri Lankan mobile number, e.g. 07XXXXXXXX",
+    "invalidNic": "Enter a valid NIC number (old: 9 digits + V/X, new: 12 digits)",
     "minChars": "Minimum 8 characters",
     "creatingAccount": "Creating account...",
     "haveAccount": "Already have an account?"

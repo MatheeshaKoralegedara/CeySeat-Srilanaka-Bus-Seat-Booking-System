@@ -19,6 +19,17 @@ const popularRoutes = [
     { from: 'Kandy', to: 'Ella', duration: '4h', fareFrom: 1200 },
 ];
 
+// Skip the multi-megabyte hero clip on save-data mode, slow connections, or
+// when the user has asked for reduced motion — the poster image covers those cases fine.
+function shouldPlayHeroVideo() {
+    if (typeof navigator === 'undefined') return true;
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (conn?.saveData) return false;
+    if (conn?.effectiveType && ['slow-2g', '2g', '3g'].includes(conn.effectiveType)) return false;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false;
+    return true;
+}
+
 const statDefs = [
     { value: '50,000+', labelKey: 'home.statTravelers' },
     { value: '120+', labelKey: 'home.statRoutes' },
@@ -55,6 +66,7 @@ export default function Home() {
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');
     const [searchError, setSearchError] = useState('');
+    const [playHeroVideo] = useState(shouldPlayHeroVideo);
     const navigate = useNavigate();
 
     function search(e) {
@@ -71,18 +83,26 @@ export default function Home() {
         <div>
             {/* Hero — full-bleed, edge to edge, navbar overlays on top */}
             <div className="relative w-full min-h-[560px] md:min-h-[680px] flex items-center overflow-hidden">
-                <video
-                    className="absolute inset-0 w-full h-full object-cover object-[center_35%]"
-                    poster={heroBanner}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    aria-label="CeySeat — Discover Sri Lanka's Wonders"
-                >
-                    <source src={heroVideo} type="video/mp4" />
-                </video>
+                {playHeroVideo ? (
+                    <video
+                        className="absolute inset-0 w-full h-full object-cover object-[center_35%]"
+                        poster={heroBanner}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="auto"
+                        aria-label="CeySeat — Discover Sri Lanka's Wonders"
+                    >
+                        <source src={heroVideo} type="video/mp4" />
+                    </video>
+                ) : (
+                    <img
+                        src={heroBanner}
+                        alt="CeySeat — Discover Sri Lanka's Wonders"
+                        className="absolute inset-0 w-full h-full object-cover object-[center_35%]"
+                    />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-900/75 via-brand-900/50 to-brand-900/40"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 via-transparent to-brand-900/50"></div>
 

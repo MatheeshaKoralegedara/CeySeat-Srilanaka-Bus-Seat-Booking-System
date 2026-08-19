@@ -36,4 +36,16 @@ public class BookingController {
     public ResponseEntity<List<BookingResponse>> getMyBookings(java.security.Principal principal) {
         return ResponseEntity.ok(bookingService.getMyBookings(principal.getName()));
     }
+
+    @GetMapping("/{groupBookingId}")
+    public ResponseEntity<List<BookingResponse>> getBookingGroup(@PathVariable String groupBookingId,
+                                                                   java.security.Principal principal) {
+        return ResponseEntity.ok(bookingService.getBookingGroup(groupBookingId, principal.getName()));
+    }
+
+    @PostMapping("/{groupBookingId}/cancel")
+    public ResponseEntity<List<BookingResponse>> cancel(@PathVariable String groupBookingId,
+                                                          java.security.Principal principal) {
+        return ResponseEntity.ok(bookingService.cancelBooking(groupBookingId, principal.getName()));
+    }
 }

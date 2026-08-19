@@ -24,7 +24,11 @@ function groupBookings(bookings) {
     for (const b of bookings) {
         const key = b.groupBookingId || b.id;
         if (!groups.has(key)) {
-            groups.set(key, { groupBookingId: key, seats: [], status: b.status, reservedUntil: b.reservedUntil, totalFare: 0, firstId: b.id });
+            groups.set(key, {
+                groupBookingId: key, seats: [], status: b.status, reservedUntil: b.reservedUntil, totalFare: 0, firstId: b.id,
+                routeId: b.routeId, departureTime: b.departureTime, arrivalTime: b.arrivalTime,
+                travelName: b.travelName, busModel: b.busModel,
+            });
         }
         const g = groups.get(key);
         g.seats.push(b.seatNo);
@@ -39,6 +43,7 @@ export default function MyBookings() {
     const { t, i18n } = useTranslation();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [cancellingId, setCancellingId] = useState(null);
     const locale = toBcp47Locale(i18n.language);
 
     useEffect(() => {
@@ -47,6 +52,19 @@ export default function MyBookings() {
             .catch(() => setBookings([]))
             .finally(() => setLoading(false));
     }, []);
+
+    const handleCancel = (groupBookingId) => {
+        if (!window.confirm(t('myBookings.cancelConfirm'))) return;
+        setCancellingId(groupBookingId);
+        client.post(`/bookings/${groupBookingId}/cancel`)
+            .then(() => {
+                setBookings((prev) => prev.map((b) =>
+                    (b.groupBookingId || b.id) === groupBookingId ? { ...b, status: 'CANCELLED' } : b
+                ));
+            })
+            .catch(() => window.alert(t('myBookings.cancelError')))
+            .finally(() => setCancellingId(null));
+    };
 
     if (loading) {
         return (
@@ -108,12 +126,18 @@ export default function MyBookings() {
                                 )}
                             </div>
                             <div className="min-w-0">
-                                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                {g.routeId && (
+                                    <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                        {g.routeId}
+                                    </p>
+                                )}
+                                <p className={g.routeId ? 'text-sm text-gray-500 dark:text-gray-400 truncate' : 'font-semibold text-gray-900 dark:text-gray-100 truncate'}>
+                                    {g.travelName && `${g.travelName} · `}
                                     {g.seats.length > 1 ? `${g.seats.length} ${t('myBookings.seat', { count: g.seats.length })}` : t('myBookings.seat', { count: 1 })} {g.seats.length === 1 ? g.seats[0] : `(${g.seats.join(', ')})`}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {g.reservedUntil && new Date(g.reservedUntil).toLocaleDateString(locale, {
-                                        month: 'short', day: 'numeric', year: 'numeric',
+                                    {g.departureTime && new Date(g.departureTime).toLocaleString(locale, {
+                                        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
                                     })}
                                 </p>
                             </div>
@@ -125,11 +149,29 @@ export default function MyBookings() {
                                 {statusKeys[g.status] ? t(statusKeys[g.status]) : g.status}
                             </span>
                             {g.status === 'RESERVED' && (
+                                <>
+                                    <Link
+                                        to={`/payment/${g.groupBookingId}`}
+                                        className="text-sm text-accent-600 dark:text-accent-400 font-semibold hover:underline"
+                                    >
+                                        {t('myBookings.payNow')}
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCancel(g.groupBookingId)}
+                                        disabled={cancellingId === g.groupBookingId}
+                                        className="text-sm text-red-600 dark:text-red-400 font-semibold hover:underline disabled:opacity-50"
+                                    >
+                                        {cancellingId === g.groupBookingId ? t('myBookings.cancelling') : t('myBookings.cancel')}
+                                    </button>
+                                </>
+                            )}
+                            {g.status === 'PAID' && (
                                 <Link
-                                    to={`/payment/${g.groupBookingId}`}
+                                    to={`/ticket/${g.groupBookingId}`}
                                     className="text-sm text-accent-600 dark:text-accent-400 font-semibold hover:underline"
                                 >
-                                    {t('myBookings.payNow')}
+                                    {t('myBookings.viewTicket')}
                                 </Link>
                             )}
                         </div>

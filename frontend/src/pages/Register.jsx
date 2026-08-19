@@ -10,18 +10,32 @@ export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
+    const [nic, setNic] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
 
+    const phonePattern = /^(0|\+94)7[0-9]{8}$/;
+    const nicPattern = /^([0-9]{9}[vVxX]|[0-9]{12})$/;
+
     async function handleSubmit(e) {
         e.preventDefault();
         setError('');
+
+        if (!phonePattern.test(phone)) {
+            setError(t('auth.invalidPhone'));
+            return;
+        }
+        if (!nicPattern.test(nic)) {
+            setError(t('auth.invalidNic'));
+            return;
+        }
+
         setLoading(true);
         try {
-            await register(fullName, email, password, phone);
-            navigate('/schedules');
+            await register(fullName, email, password, phone, nic);
+            navigate('/verify');
         } catch (err) {
             setError(err.response?.data?.error || 'Registration failed');
         } finally {
@@ -74,9 +88,26 @@ export default function Register() {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('auth.phone')}</label>
                         <input
+                            type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="07XXXXXXXX"
+                            required
+                            pattern="^(0|\+94)7[0-9]{8}$"
+                            title={t('auth.invalidPhone')}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('auth.nic')}</label>
+                        <input
+                            value={nic}
+                            onChange={(e) => setNic(e.target.value)}
+                            placeholder="200012345678 / 991234567V"
+                            required
+                            pattern="^([0-9]{9}[vVxX]|[0-9]{12})$"
+                            title={t('auth.invalidNic')}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-shadow"
                         />
                     </div>

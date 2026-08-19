@@ -24,10 +24,21 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler({SeatUnavailableException.class, DuplicateKeyException.class})
-    public ResponseEntity<Map<String, String>> handleConflict(RuntimeException ex) {
+    @ExceptionHandler(SeatUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleSeatUnavailable(SeatUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "Seat already reserved or booked. Please choose another seat."));
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    // Callers should catch DuplicateKeyException themselves and translate it
+    // into a message that fits their own conflict (see BookingService,
+    // AuthService) — this is only a safety net for one that slips through
+    // uncaught, so it can't claim to know what actually conflicted.
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateKey(DuplicateKeyException ex) {
+        log.warn("Unhandled duplicate key conflict", ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "This record already exists."));
     }
 
     @ExceptionHandler(DateTimeParseException.class)

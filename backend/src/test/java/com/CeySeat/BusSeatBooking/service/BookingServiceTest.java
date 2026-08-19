@@ -6,9 +6,11 @@ import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
 import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
 import com.CeySeat.BusSeatBooking.model.Seat;
+import com.CeySeat.BusSeatBooking.model.User;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
+import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +38,9 @@ class BookingServiceTest {
     @Mock
     private BusRepository busRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private BookingService bookingService;
 
@@ -45,6 +50,11 @@ class BookingServiceTest {
         request.setScheduleId("schedule-1");
         request.setSeatNumbers(List.of("A1"));
         request.setPassengerGenders(Map.of("A1", "MALE"));
+
+        User user = new User();
+        user.setId("user-1");
+        user.setEmailVerified(true);
+        when(userRepository.findById("user-1")).thenReturn(Optional.of(user));
 
         Schedule schedule = new Schedule();
         schedule.setBusId("bus-1");

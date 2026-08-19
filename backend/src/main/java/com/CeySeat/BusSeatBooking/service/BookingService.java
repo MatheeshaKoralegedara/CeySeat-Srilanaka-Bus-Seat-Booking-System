@@ -10,9 +10,11 @@ import com.CeySeat.BusSeatBooking.model.Bus;
 import com.CeySeat.BusSeatBooking.model.Schedule;
 import com.CeySeat.BusSeatBooking.model.Seat;
 import com.CeySeat.BusSeatBooking.model.ScheduleStatus;
+import com.CeySeat.BusSeatBooking.model.User;
 import com.CeySeat.BusSeatBooking.repository.BookingRepository;
 import com.CeySeat.BusSeatBooking.repository.BusRepository;
 import com.CeySeat.BusSeatBooking.repository.ScheduleRepository;
+import com.CeySeat.BusSeatBooking.repository.UserRepository;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,15 +35,23 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ScheduleRepository scheduleRepository;
     private final BusRepository busRepository;
+    private final UserRepository userRepository;
 
     public BookingService(BookingRepository bookingRepository, ScheduleRepository scheduleRepository,
-                           BusRepository busRepository) {
+                           BusRepository busRepository, UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.scheduleRepository = scheduleRepository;
         this.busRepository = busRepository;
+        this.userRepository = userRepository;
     }
 
     public List<BookingResponse> reserveSeats(ReserveSeatsRequest request, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        if (!user.isEmailVerified()) {
+            throw new IllegalStateException("Please verify your email address before booking a seat.");
+        }
+
         Schedule schedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new NotFoundException("Schedule not found: " + request.getScheduleId()));
 
@@ -101,7 +112,7 @@ public class BookingService {
             }
         }
 
-        return saved.stream().map(this::toResponse).collect(Collectors.toList());
+        return toResponses(saved);
     }
 
     public BookingResponse payBooking(String bookingId, String paymentRef, String requestingUserId) {
@@ -118,22 +129,72 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.PAID);
         booking.setPaymentReference(paymentRef);
-        return toResponse(bookingRepository.save(booking));
+        return toResponses(List.of(bookingRepository.save(booking))).get(0);
+    }
+
+    public List<BookingResponse> cancelBooking(String groupBookingId, String requestingUserId) {
+        List<Booking> bookings = bookingRepository.findByGroupBookingId(groupBookingId);
+        if (bookings.isEmpty()) {
+            throw new NotFoundException("Booking not found: " + groupBookingId);
+        }
+
+        for (Booking booking : bookings) {
+            if (!booking.getUserId().equals(requestingUserId)) {
+                throw new SecurityException("You do not own this booking.");
+            }
+            if (booking.getStatus() != BookingStatus.RESERVED) {
+                throw new SeatUnavailableException("Only reserved bookings can be cancelled.");
+            }
+        }
+
+        bookings.forEach(b -> b.setStatus(BookingStatus.CANCELLED));
+        return toResponses(bookingRepository.saveAll(bookings));
     }
 
     public List<BookingResponse> getBookedSeats(String scheduleId) {
-        return bookingRepository
-                .findByScheduleIdAndStatusIn(scheduleId, List.of(BookingStatus.RESERVED, BookingStatus.PAID))
-                .stream().map(this::toResponse).collect(Collectors.toList());
+        return toResponses(bookingRepository
+                .findByScheduleIdAndStatusIn(scheduleId, List.of(BookingStatus.RESERVED, BookingStatus.PAID)));
     }
 
-    private BookingResponse toResponse(Booking b) {
-        return new BookingResponse(b.getId(), b.getScheduleId(), b.getGroupBookingId(), b.getSeatNo(),
-                b.getStatus(), b.getReservedUntil(), b.getFare(), b.getPassengerGender());
+    // Batches the Schedule/Bus lookups (one query each, not per booking) so a
+    // multi-seat group or a passenger's whole history doesn't turn into an N+1.
+    private List<BookingResponse> toResponses(List<Booking> bookings) {
+        Set<String> scheduleIds = bookings.stream().map(Booking::getScheduleId).collect(Collectors.toSet());
+        Map<String, Schedule> schedulesById = scheduleRepository.findAllById(scheduleIds).stream()
+                .collect(Collectors.toMap(Schedule::getId, s -> s));
+
+        Set<String> busIds = schedulesById.values().stream().map(Schedule::getBusId).collect(Collectors.toSet());
+        Map<String, Bus> busesById = busRepository.findAllById(busIds).stream()
+                .collect(Collectors.toMap(Bus::getId, b -> b));
+
+        return bookings.stream().map(b -> {
+            Schedule schedule = schedulesById.get(b.getScheduleId());
+            Bus bus = schedule != null ? busesById.get(schedule.getBusId()) : null;
+            return new BookingResponse(b.getId(), b.getScheduleId(), b.getGroupBookingId(), b.getSeatNo(),
+                    b.getStatus(), b.getReservedUntil(), b.getFare(), b.getPassengerGender(),
+                    schedule != null ? schedule.getRouteId() : null,
+                    schedule != null ? schedule.getDepartureTime() : null,
+                    schedule != null ? schedule.getArrivalTime() : null,
+                    bus != null ? bus.getTravelName() : null,
+                    bus != null ? bus.getModel() : null,
+                    bus != null ? bus.getRegistrationNo() : null,
+                    bus != null ? bus.getContactNumber() : null);
+        }).collect(Collectors.toList());
+    }
+
+    public List<BookingResponse> getBookingGroup(String groupBookingId, String requestingUserId) {
+        List<Booking> bookings = bookingRepository.findByGroupBookingId(groupBookingId);
+        if (bookings.isEmpty()) {
+            throw new NotFoundException("Booking not found: " + groupBookingId);
+        }
+        boolean ownedByCaller = bookings.stream().allMatch(b -> b.getUserId().equals(requestingUserId));
+        if (!ownedByCaller) {
+            throw new SecurityException("You do not own this booking.");
+        }
+        return toResponses(bookings);
     }
 
     public List<BookingResponse> getMyBookings(String userId) {
-        return bookingRepository.findByUserIdOrderByReservedUntilDesc(userId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+        return toResponses(bookingRepository.findByUserIdOrderByReservedUntilDesc(userId));
     }
 }

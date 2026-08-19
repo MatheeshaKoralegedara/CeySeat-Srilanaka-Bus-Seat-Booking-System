@@ -37,7 +37,10 @@ export default function SeatSelect() {
     const [seatGenders, setSeatGenders] = useState({});
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [error, setError] = useState('');
+    const [needsVerification, setNeedsVerification] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const [reloadKey, setReloadKey] = useState(0);
     const [reserving, setReserving] = useState(false);
     const [showGenderModal, setShowGenderModal] = useState(false);
     const { user } = useAuth();
@@ -55,6 +58,8 @@ export default function SeatSelect() {
 
     useEffect(() => {
         async function load() {
+            setLoading(true);
+            setLoadError('');
             try {
                 const scheduleRes = await client.get(`/schedules/${scheduleId}`);
                 const busRes = await client.get(`/buses/${scheduleRes.data.busId}`);
@@ -64,7 +69,10 @@ export default function SeatSelect() {
                 setSeatLayout(busRes.data.seatLayout || []);
                 await refreshSeats();
             } catch (err) {
-                setError('Could not load seat map for this bus.');
+                setLoadError(
+                    err.response?.data?.error
+                    || (err.request && !err.response ? 'Network error. Check your connection and try again.' : 'Could not load seat map for this bus.')
+                );
             } finally {
                 setLoading(false);
             }
@@ -78,7 +86,8 @@ export default function SeatSelect() {
             refreshSeats().catch(() => {});
         }, 10000);
         return () => clearInterval(interval);
-    }, [scheduleId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scheduleId, reloadKey]);
 
     useEffect(() => {
         setSelectedSeats((prev) => {
@@ -123,6 +132,7 @@ export default function SeatSelect() {
     async function confirmReserve(passengerGenders) {
         setShowGenderModal(false);
         setError('');
+        setNeedsVerification(false);
         setReserving(true);
         try {
             const res = await client.post('/bookings/reserve', {
@@ -130,9 +140,17 @@ export default function SeatSelect() {
                 seatNumbers: selectedSeats,
                 passengerGenders,
             });
-            navigate(`/payment/${res.data[0].groupBookingId}`);
+            // The hold clock starts the instant this reserve call succeeds,
+            // not when the payment page's own fetch resolves — hand the
+            // deadline over so the countdown can render immediately instead
+            // of leaving the passenger with no visible timer in between.
+            navigate(`/payment/${res.data[0].groupBookingId}`, {
+                state: { reservedUntil: res.data[0].reservedUntil },
+            });
         } catch (err) {
-            setError(err.response?.data?.error || 'Could not reserve seat(s)');
+            const message = err.response?.data?.error || 'Could not reserve seat(s)';
+            setError(message);
+            setNeedsVerification(message.toLowerCase().includes('verify'));
             setReserving(false);
         }
     }
@@ -166,6 +184,20 @@ export default function SeatSelect() {
                         ))}
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    if (loadError) {
+        return (
+            <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 max-w-md mx-auto px-6">
+                <p className="text-red-600 dark:text-red-400 mb-4">{loadError}</p>
+                <button
+                    onClick={() => setReloadKey((k) => k + 1)}
+                    className="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm"
+                >
+                    {t('seats.retry')}
+                </button>
             </div>
         );
     }
@@ -300,7 +332,17 @@ export default function SeatSelect() {
             </div>
 
             {error && (
-                <p className="text-red-600 dark:text-red-400 text-sm mt-4 text-center bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg px-4 py-2">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-4 text-center bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg px-4 py-2">
+                    {error}
+                    {needsVerification && (
+                        <>
+                            {' '}
+                            <button onClick={() => navigate('/verify')} className="font-semibold underline">
+                                Verify now
+                            </button>
+                        </>
+                    )}
+                </p>
             )}
 
             {/* Sticky selection summary bar */}

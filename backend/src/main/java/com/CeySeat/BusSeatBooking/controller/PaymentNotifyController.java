@@ -49,6 +49,27 @@ public class PaymentNotifyController {
             if (group.isEmpty()) {
                 log.warn("PayHere notify for unknown booking group {}", orderId);
             } else {
+                double expectedTotal = group.stream().mapToDouble(Booking::getFare).sum();
+                double notifiedAmount;
+                try {
+                    notifiedAmount = Double.parseDouble(amount);
+                } catch (NumberFormatException e) {
+                    log.warn("PayHere notify for order {} had unparseable amount '{}'", orderId, amount);
+                    return ResponseEntity.status(400).body("Invalid amount");
+                }
+
+                // Defense-in-depth: the signature only proves PayHere sent this
+                // notify, not that the amount matches what we actually charged
+                // for. Re-sum the bookings ourselves rather than trust the
+                // notified figure blindly — protects against a compromised
+                // merchant secret or a tampered client-side amount elsewhere
+                // in the flow.
+                if (Math.abs(notifiedAmount - expectedTotal) > 0.01) {
+                    log.warn("PayHere notify amount mismatch for order {}: notified {} vs expected {}",
+                            orderId, notifiedAmount, expectedTotal);
+                    return ResponseEntity.status(400).body("Amount mismatch");
+                }
+
                 group.stream()
                         .filter(b -> b.getStatus() == BookingStatus.RESERVED)
                         .forEach(b -> {
